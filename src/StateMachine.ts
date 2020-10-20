@@ -1,7 +1,7 @@
 export interface IState {
   name: string;
-  onEnter<T>(transition: ITransition, param?: T): void;
-  onExit(transition: ITransition): void;
+  onEnter?(transition: ITransition, param?: any): void;
+  onExit?(transition: ITransition): void;
 }
 
 export interface ITransition {
@@ -44,13 +44,17 @@ export default function _default() {
   function _enter(transition: ITransition, param: any) {
     const pre = _state.currentState;
     if (pre) {
-      pre.onExit(transition);
+      if (pre.onExit) {
+        pre.onExit(transition);
+      }
       _executeEventHandler("exit", { state: pre, transition });
     }
     const next = _state.states[transition.to] || null;
     if (next) {
       _executeEventHandler("enter", { state: next, transition });
-      next.onEnter(transition, param || {});
+      if (next.onEnter) {
+        next.onEnter(transition, param || {});
+      }
     }
     _state.currentState = next;
   }
