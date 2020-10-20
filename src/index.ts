@@ -45,6 +45,19 @@ useStateMachine()
     from: "world",
     to: "apple",
   })
+  .putTransition({
+    from: "apple",
+    to: "world",
+  })
+  .on("enter", (param: any) => {
+    console.log("---- enter >> ");
+    console.log(param);
+  })
+  .on("exit", (param: any) => {
+    console.log("<<");
+    console.log(param);
+  })
   .enter("hello", { abc: 123 })
   .to("world", { bbb: "ccc" })
-  .to("apple", { test: 111 });
+  .to("apple", { test: 111 })
+  .to("world");

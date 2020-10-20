@@ -16,6 +16,7 @@ export default function _default() {
     currentState: null as IState | null,
     states: {} as { [key: string]: IState },
     transitions: {} as { [key: string]: ITransition[] },
+    handlers: {} as { [key: string]: Function },
   };
 
   function putState(state: IState): DefaultType {
@@ -44,9 +45,11 @@ export default function _default() {
     const pre = _state.currentState;
     if (pre) {
       pre.onExit(transition);
+      _executeEventHandler("exit", { state: pre, transition });
     }
     const next = _state.states[transition.to] || null;
     if (next) {
+      _executeEventHandler("enter", { state: next, transition });
       next.onEnter(transition, param || {});
     }
     _state.currentState = next;
@@ -66,11 +69,24 @@ export default function _default() {
     return self;
   }
 
+  function on(eventName: string, handler: Function) {
+    _state.handlers[eventName] = handler;
+    return self;
+  }
+
+  function _executeEventHandler(eventName: string, param: any) {
+    const h = _state.handlers[eventName];
+    if (h) {
+      h(param);
+    }
+  }
+
   const self = {
     putState,
     putTransition,
     enter,
     to,
+    on,
   };
 
   return self;
