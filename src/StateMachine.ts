@@ -50,7 +50,7 @@ export default function _default() {
     return self;
   }
 
-  function enter<T>(stateName: string, param?: T) {
+  function enter<T>(stateName: string, param?: T): DefaultType {
     _enter({ from: "", to: stateName }, param);
     return self;
   }
@@ -73,7 +73,7 @@ export default function _default() {
     _state.currentState = next;
   }
 
-  function to(stateName: string, param?: any) {
+  function to(stateName: string, param?: any): DefaultType {
     if (_state.currentState) {
       const ts = _state.transitions[_state.currentState.name];
       if (ts) {
@@ -87,7 +87,7 @@ export default function _default() {
     return self;
   }
 
-  function on(eventName: string, handler: Function) {
+  function on(eventName: string, handler: Function): DefaultType {
     _state.handlers[eventName] = handler;
     return self;
   }
