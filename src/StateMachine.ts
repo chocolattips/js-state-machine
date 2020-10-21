@@ -19,8 +19,22 @@ export default function _default() {
     handlers: {} as { [key: string]: Function },
   };
 
+  function putStates(states: IState[]): DefaultType {
+    for (const o of states) {
+      putState(o);
+    }
+    return self;
+  }
+
   function putState(state: IState): DefaultType {
     _state.states[state.name] = state;
+    return self;
+  }
+
+  function putTransitions(transitions: ITransition[]): DefaultType {
+    for (const o of transitions) {
+      putTransition(o);
+    }
     return self;
   }
 
@@ -86,7 +100,9 @@ export default function _default() {
   }
 
   const self = {
+    putStates,
     putState,
+    putTransitions,
     putTransition,
     enter,
     to,
