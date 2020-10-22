@@ -4,7 +4,7 @@ export type KeyValueType<T> = { [key: string]: T };
 
 export interface IUpdateParam {
   key: string;
-  data: any;
+  data?: any;
 }
 
 export interface IState {
