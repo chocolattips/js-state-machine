@@ -1,3 +1,7 @@
+import useStateMachineBuilder from "./StateMachineBuilder";
+
+export type KeyValueType<T> = { [key: string]: T };
+
 export interface IState {
   name: string;
   onEnter?(transition: ITransition, param?: any): void;
@@ -14,41 +18,12 @@ type DefaultType = ReturnType<typeof _default>;
 export default function _default() {
   const _state = {
     currentState: null as IState | null,
-    states: {} as { [key: string]: IState },
-    transitions: {} as { [key: string]: ITransition[] },
-    handlers: {} as { [key: string]: Function },
+    states: {} as KeyValueType<IState>,
+    transitions: {} as KeyValueType<ITransition[]>,
+    handlers: {} as KeyValueType<Function>,
   };
 
-  function putStates(states: IState[]): DefaultType {
-    for (const o of states) {
-      putState(o);
-    }
-    return self;
-  }
-
-  function putState(state: IState): DefaultType {
-    _state.states[state.name] = state;
-    return self;
-  }
-
-  function putTransitions(transitions: ITransition[]): DefaultType {
-    for (const o of transitions) {
-      putTransition(o);
-    }
-    return self;
-  }
-
-  function putTransition(transition: ITransition): DefaultType {
-    const ts = _state.transitions[transition.from] || [];
-    const index = ts.findIndex((x) => x.to == transition.to);
-    if (index == -1) {
-      ts.push(transition);
-    } else {
-      ts[index] = transition;
-    }
-    _state.transitions[transition.from] = ts;
-    return self;
-  }
+  const _builder = useStateMachineBuilder(_state.states, _state.transitions);
 
   function enter<T>(stateName: string, param?: T): DefaultType {
     _enter({ from: "", to: stateName }, param);
@@ -100,10 +75,22 @@ export default function _default() {
   }
 
   const self = {
-    putStates,
-    putState,
-    putTransitions,
-    putTransition,
+    putStates(x: IState[]) {
+      _builder.putStates(x);
+      return self;
+    },
+    putState(x: IState) {
+      _builder.putState(x);
+      return self;
+    },
+    putTransitions(x: ITransition[]) {
+      _builder.putTransitions(x);
+      return self;
+    },
+    putTransition(x: ITransition) {
+      _builder.putTransition(x);
+      return self;
+    },
     enter,
     to,
     on,
