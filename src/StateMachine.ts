@@ -19,6 +19,13 @@ export interface ITransition {
   to: string;
 }
 
+export interface IEnterExitParam {
+  state: IState;
+  transition: ITransition;
+}
+
+export type EnterExitHandlerType = (param: IEnterExitParam) => void;
+
 type DefaultType = ReturnType<typeof _default>;
 
 export default function _default() {
@@ -26,7 +33,7 @@ export default function _default() {
     currentState: null as IState | null,
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
-    handlers: {} as KeyValueType<Function>,
+    enterExitHandlers: {} as KeyValueType<EnterExitHandlerType>,
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
@@ -50,11 +57,11 @@ export default function _default() {
       if (pre.onExit) {
         pre.onExit(transition);
       }
-      _executeEventHandler("exit", { state: pre, transition });
+      _executeEnterExitHandler("exit", { state: pre, transition });
     }
     const next = _state.states[transition.to] || null;
     if (next) {
-      _executeEventHandler("enter", { state: next, transition });
+      _executeEnterExitHandler("enter", { state: next, transition });
       if (next.onEnter) {
         next.onEnter(transition, param || {});
       }
@@ -76,13 +83,15 @@ export default function _default() {
     return self;
   }
 
-  function on(eventName: string, handler: Function): DefaultType {
-    _state.handlers[eventName] = handler;
+  function on(eventName: string, handler: EnterExitHandlerType): DefaultType {
+    if (eventName == "enter" || eventName == "exit") {
+      _state.enterExitHandlers[eventName] = handler;
+    }
     return self;
   }
 
-  function _executeEventHandler(eventName: string, param: any) {
-    const h = _state.handlers[eventName];
+  function _executeEnterExitHandler(eventName: string, param: IEnterExitParam) {
+    const h = _state.enterExitHandlers[eventName];
     if (h) {
       h(param);
     }
