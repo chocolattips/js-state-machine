@@ -4,14 +4,14 @@ export type KeyValueType<T> = { [key: string]: T };
 
 export interface IUpdateParam {
   key: string;
-  data?: any;
+  value?: any;
 }
 
 export interface IState {
   name: string;
-  onEnter?(transition: ITransition, param?: any): void;
-  onUpdate?(param: IUpdateParam): void;
-  onExit?(transition: ITransition): void;
+  onEnter?(param: IEnterExitParam, data?: any): void;
+  onUpdate?(state: IState, param: IUpdateParam): void;
+  onExit?(param: IEnterExitParam): void;
 }
 
 export interface ITransition {
@@ -41,7 +41,7 @@ export default function _default() {
   function updateData(param: IUpdateParam) {
     const c = _state.currentState;
     if (c && c.onUpdate) {
-      c.onUpdate(param);
+      c.onUpdate(c, param);
     }
     return self;
   }
@@ -55,7 +55,7 @@ export default function _default() {
     const pre = _state.currentState;
     if (pre) {
       if (pre.onExit) {
-        pre.onExit(transition);
+        pre.onExit({ state: pre, transition });
       }
       _executeEnterExitHandler("exit", { state: pre, transition });
     }
@@ -66,21 +66,29 @@ export default function _default() {
     if (next) {
       _executeEnterExitHandler("enter", { state: next, transition });
       if (next.onEnter) {
-        next.onEnter(transition, param || {});
+        next.onEnter({ state: next, transition }, param || {});
       }
     }
   }
 
-  function to(stateName: string, param?: any): DefaultType {
-    if (_state.currentState) {
-      const ts = _state.transitions[_state.currentState.name];
-      if (ts) {
-        const index = ts.findIndex((x) => x.to == stateName);
-        if (index != -1) {
-          const t = ts[index];
-          _enter(t, param);
-        }
-      }
+  function to(stateName: string, param?: any, current?: IState): DefaultType {
+    if (!_state.currentState) {
+      return self;
+    }
+
+    if (current && current.name != _state.currentState.name) {
+      return self;
+    }
+
+    const ts = _state.transitions[_state.currentState.name];
+    if (!ts) {
+      return self;
+    }
+
+    const index = ts.findIndex((x) => x.to == stateName);
+    if (index != -1) {
+      const t = ts[index];
+      _enter(t, param);
     }
     return self;
   }
