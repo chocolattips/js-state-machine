@@ -124,6 +124,10 @@ export default function _default() {
       _builder.putTransition(x);
       return self;
     },
+    putSequences(x: IState[]) {
+      _builder.putSequences(x);
+      return self;
+    },
     updateData,
     enter,
     to,

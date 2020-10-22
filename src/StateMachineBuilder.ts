@@ -37,11 +37,25 @@ export default function _default(
     return self;
   }
 
+  function putSequences(states: IState[]): DefaultType {
+    let pre: IState | null = null;
+    for (let i = 0, len = states.length; i < len; i++) {
+      const s = states[i];
+      putState(s);
+      if (pre) {
+        putTransition({ from: pre.name, to: s.name });
+      }
+      pre = s;
+    }
+    return self;
+  }
+
   const self = {
     putStates,
     putState,
     putTransitions,
     putTransition,
+    putSequences,
   };
 
   return self;
