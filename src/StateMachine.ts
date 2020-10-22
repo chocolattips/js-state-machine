@@ -31,6 +31,7 @@ type DefaultType = ReturnType<typeof _default>;
 export default function _default() {
   const _state = {
     headStateName: "",
+    isFinished: false,
     currentState: null as IState | null,
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
@@ -50,6 +51,7 @@ export default function _default() {
 
   function enter<T>(stateName: string, param?: T): DefaultType {
     _state.headStateName = stateName;
+    _state.isFinished = false;
     _enter({ from: "", to: stateName }, param);
     return self;
   }
@@ -69,6 +71,9 @@ export default function _default() {
     if (next) {
       if (transition.to == _state.headStateName) {
         _executeEventHandler("head");
+      }
+      if (_state.isFinished) {
+        return;
       }
 
       _executeEnterExitHandler("enter", { state: next, transition });
@@ -126,6 +131,10 @@ export default function _default() {
     }
   }
 
+  function finish() {
+    _state.isFinished = true;
+  }
+
   const self = {
     putStates(x: IState[]) {
       _builder.putStates(x);
@@ -151,6 +160,7 @@ export default function _default() {
     enter,
     to,
     on,
+    finish,
   };
 
   return self;
