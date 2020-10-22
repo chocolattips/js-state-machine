@@ -59,14 +59,16 @@ export default function _default() {
       }
       _executeEnterExitHandler("exit", { state: pre, transition });
     }
+
     const next = _state.states[transition.to] || null;
+    _state.currentState = next;
+
     if (next) {
       _executeEnterExitHandler("enter", { state: next, transition });
       if (next.onEnter) {
         next.onEnter(transition, param || {});
       }
     }
-    _state.currentState = next;
   }
 
   function to(stateName: string, param?: any): DefaultType {
