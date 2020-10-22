@@ -2,9 +2,15 @@ import useStateMachineBuilder from "./StateMachineBuilder";
 
 export type KeyValueType<T> = { [key: string]: T };
 
+export interface IUpdateParam {
+  key: string;
+  data: any;
+}
+
 export interface IState {
   name: string;
   onEnter?(transition: ITransition, param?: any): void;
+  onUpdate?(param: IUpdateParam): void;
   onExit?(transition: ITransition): void;
 }
 
@@ -24,6 +30,14 @@ export default function _default() {
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
+
+  function updateData(param: IUpdateParam) {
+    const c = _state.currentState;
+    if (c && c.onUpdate) {
+      c.onUpdate(param);
+    }
+    return self;
+  }
 
   function enter<T>(stateName: string, param?: T): DefaultType {
     _enter({ from: "", to: stateName }, param);
@@ -91,6 +105,7 @@ export default function _default() {
       _builder.putTransition(x);
       return self;
     },
+    updateData,
     enter,
     to,
     on,
