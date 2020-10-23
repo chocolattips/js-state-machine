@@ -2,16 +2,11 @@ import useStateMachineBuilder from "./StateMachineBuilder";
 
 export type KeyValueType<T> = { [key: string]: T };
 
-export interface IUpdateParam {
-  key: string;
-  value?: any;
-}
-
 export interface IState {
   name: string;
-  onEnter?(param: IEnterExitParam, data?: any): void;
-  onUpdate?(state: IState, param: IUpdateParam): void;
-  onExit?(param: IEnterExitParam): void;
+  onEnter?(param: IEnterExitParam, variable: ISharedVariable): void;
+  onUpdate?(param: IUpdateParam, variable: ISharedVariable): void;
+  onExit?(param: IEnterExitParam, variable: ISharedVariable): void;
 }
 
 export interface ITransition {
@@ -24,7 +19,21 @@ export interface IEnterExitParam {
   transition: ITransition;
 }
 
-export type EnterExitHandlerType = (param: IEnterExitParam) => void;
+export interface IUpdateParam {
+  state: IState;
+  key: string;
+  value?: any;
+}
+
+export interface ISharedVariable {
+  local: KeyValueType<any>;
+  global: KeyValueType<any>;
+}
+
+export type EnterExitHandlerType = (
+  param: IEnterExitParam,
+  variable: ISharedVariable
+) => void;
 
 type DefaultType = ReturnType<typeof _default>;
 
@@ -37,14 +46,15 @@ export default function _default() {
     transitions: {} as KeyValueType<ITransition[]>,
     enterExitHandlers: {} as KeyValueType<EnterExitHandlerType>,
     eventHandlers: {} as KeyValueType<Function>,
+    sharedVariable: { local: {}, global: {} } as ISharedVariable,
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
 
-  function updateData(param: IUpdateParam) {
+  function updateData(key: string, value?: any) {
     const c = _state.currentState;
     if (c && c.onUpdate) {
-      c.onUpdate(c, param);
+      c.onUpdate({ state: c, key, value }, _state.sharedVariable);
     }
     return self;
   }
@@ -57,12 +67,14 @@ export default function _default() {
   }
 
   function _enter(transition: ITransition, param: any) {
+    const shared = _state.sharedVariable;
+
     const pre = _state.currentState;
     if (pre) {
       if (pre.onExit) {
-        pre.onExit({ state: pre, transition });
+        pre.onExit({ state: pre, transition }, shared);
       }
-      _executeEnterExitHandler("exit", { state: pre, transition });
+      _executeEnterExitHandler("exit", { state: pre, transition }, shared);
     }
 
     const next = _state.states[transition.to] || null;
@@ -72,13 +84,16 @@ export default function _default() {
       if (transition.to == _state.headStateName) {
         _executeEventHandler("head");
       }
+
       if (_state.isFinished) {
         return;
       }
 
-      _executeEnterExitHandler("enter", { state: next, transition });
+      shared.local = {};
+
+      _executeEnterExitHandler("enter", { state: next, transition }, shared);
       if (next.onEnter) {
-        next.onEnter({ state: next, transition }, param || {});
+        next.onEnter({ state: next, transition }, shared);
       }
     }
   }
@@ -124,10 +139,14 @@ export default function _default() {
     }
   }
 
-  function _executeEnterExitHandler(eventName: string, param: IEnterExitParam) {
+  function _executeEnterExitHandler(
+    eventName: string,
+    param: IEnterExitParam,
+    variable: ISharedVariable
+  ) {
     const h = _state.enterExitHandlers[eventName];
     if (h) {
-      h(param);
+      h(param, variable);
     }
   }
 
