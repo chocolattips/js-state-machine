@@ -1,10 +1,42 @@
 import {
+  EnterExitHandlerType,
+  IEnterExitParam,
   ISharedVariable,
   IUpdateParam,
   UpdateHandlerType,
 } from "./StateMachine";
 
 export default function _default() {
+  function executeEnter(
+    param: IEnterExitParam,
+    variable: ISharedVariable,
+    handler: EnterExitHandlerType
+  ) {
+    if (handler) {
+      handler(param, variable);
+    }
+
+    const c = param.state;
+    if (c.onEnter) {
+      c.onEnter(param, variable);
+    }
+  }
+
+  function executeExit(
+    param: IEnterExitParam,
+    variable: ISharedVariable,
+    handler: EnterExitHandlerType
+  ) {
+    if (handler) {
+      handler(param, variable);
+    }
+
+    const c = param.state;
+    if (c.onExit) {
+      c.onExit(param, variable);
+    }
+  }
+
   function executeUpdate(
     param: IUpdateParam,
     variable: ISharedVariable,
@@ -27,6 +59,8 @@ export default function _default() {
   }
 
   const self = {
+    executeEnter,
+    executeExit,
     executeUpdate,
   };
 

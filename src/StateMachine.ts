@@ -97,10 +97,11 @@ export default function _default() {
 
     const pre = _state.currentState;
     if (pre) {
-      if (pre.onExit) {
-        pre.onExit({ state: pre, transition }, shared);
-      }
-      _executeEnterExitHandler("exit", { state: pre, transition }, shared);
+      _callback.executeExit(
+        { state: pre, transition },
+        shared,
+        _state.handler.enterExits["exit"]
+      );
     }
 
     const next = _state.states[transition.to] || null;
@@ -117,10 +118,14 @@ export default function _default() {
 
       shared.local = {};
 
-      _executeEnterExitHandler("enter", { state: next, transition }, shared);
-      if (next.onEnter) {
-        next.onEnter({ state: next, transition }, shared);
-      }
+      _callback.executeEnter(
+        {
+          state: next,
+          transition,
+        },
+        shared,
+        _state.handler.enterExits["enter"]
+      );
     }
   }
 
@@ -164,17 +169,6 @@ export default function _default() {
     const h = _state.handler.events[eventName];
     if (h) {
       h();
-    }
-  }
-
-  function _executeEnterExitHandler(
-    eventName: string,
-    param: IEnterExitParam,
-    variable: ISharedVariable
-  ) {
-    const h = _state.handler.enterExits[eventName];
-    if (h) {
-      h(param, variable);
     }
   }
 
