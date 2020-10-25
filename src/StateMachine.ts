@@ -56,6 +56,7 @@ export default function _default() {
   const _state = {
     headStateName: "",
     isFinished: false,
+    isEnded: false,
     currentState: null as IState | null,
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
@@ -81,6 +82,8 @@ export default function _default() {
         },
         _state.sharedVariable
       );
+    } else {
+      console.log(`x not update data : ${key}`);
     }
     return self;
   }
@@ -88,7 +91,10 @@ export default function _default() {
   function enter<T>(stateName: string, param?: T): DefaultType {
     _state.headStateName = stateName;
     _state.isFinished = false;
-    _enter({ from: "", to: stateName }, param);
+    _state.isFinished = false;
+    setTimeout(() => {
+      _enter({ from: "", to: stateName }, param);
+    }, 0);
     return self;
   }
 
@@ -101,7 +107,7 @@ export default function _default() {
     }
 
     const next = _state.states[transition.to] || null;
-    _state.currentState = next;
+    _state.currentState = null;
 
     if (next) {
       if (transition.to == _state.headStateName) {
@@ -109,9 +115,11 @@ export default function _default() {
       }
 
       if (_state.isFinished) {
+        _end();
         return;
       }
 
+      _state.currentState = next;
       shared.local = {};
 
       _callback.executeEnter(
@@ -124,8 +132,17 @@ export default function _default() {
     }
 
     if (!_state.currentState || !_state.transitions[_state.currentState.name]) {
-      _callback.executeEvent("end");
+      _end();
     }
+  }
+
+  function _end() {
+    if (_state.isEnded) {
+      return;
+    }
+
+    _state.isEnded = true;
+    _callback.executeEvent("end");
   }
 
   function to(stateName: string, param?: any, current?: IState): DefaultType {
@@ -145,13 +162,23 @@ export default function _default() {
     const index = ts.findIndex((x) => x.to == stateName);
     if (index != -1) {
       const t = ts[index];
-      _enter(t, param);
+      setTimeout(() => {
+        _enter(t, param);
+      }, 0);
     }
     return self;
   }
 
   function finish() {
+    console.log("* FINISH");
     _state.isFinished = true;
+    setTimeout(() => {
+      if (_state.currentState) {
+        _enter({ from: _state.currentState.name, to: "" }, null);
+      } else {
+        _end();
+      }
+    }, 0);
   }
 
   const self = {
