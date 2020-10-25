@@ -170,7 +170,6 @@ export default function _default() {
   }
 
   function finish() {
-    console.log("* FINISH");
     _state.isFinished = true;
     setTimeout(() => {
       if (_state.currentState) {
