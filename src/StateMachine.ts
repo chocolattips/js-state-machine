@@ -122,6 +122,10 @@ export default function _default() {
         shared
       );
     }
+
+    if (!_state.currentState || !_state.transitions[_state.currentState.name]) {
+      _callback.executeEvent("end");
+    }
   }
 
   function to(stateName: string, param?: any, current?: IState): DefaultType {
