@@ -1,4 +1,5 @@
 import useStateMachineBuilder from "./FSMBuilder";
+import useStateMachineCallback from "./FSMCallback";
 
 export type KeyValueType<T> = { [key: string]: T };
 
@@ -66,25 +67,20 @@ export default function _default() {
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
+  const _callback = useStateMachineCallback();
 
   function updateData(key: string, value?: any) {
     const c = _state.currentState;
     if (c) {
-      _executeUpdateHandler(
-        "update",
-        { state: c, key, value },
-        _state.sharedVariable
+      _callback.executeUpdate(
+        {
+          state: c,
+          key,
+          value,
+        },
+        _state.sharedVariable,
+        _state.handler.updates[key]
       );
-
-      if (c.onUpdateMethods) {
-        const h = c.onUpdateMethods[key];
-        if (h) {
-          h({ state: c, key, value }, _state.sharedVariable);
-        }
-      }
-      if (c.onUpdate) {
-        c.onUpdate({ state: c, key, value }, _state.sharedVariable);
-      }
     }
     return self;
   }
@@ -177,17 +173,6 @@ export default function _default() {
     variable: ISharedVariable
   ) {
     const h = _state.handler.enterExits[eventName];
-    if (h) {
-      h(param, variable);
-    }
-  }
-
-  function _executeUpdateHandler(
-    eventName: string,
-    param: IUpdateParam,
-    variable: ISharedVariable
-  ) {
-    const h = _state.handler.updates[eventName];
     if (h) {
       h(param, variable);
     }
