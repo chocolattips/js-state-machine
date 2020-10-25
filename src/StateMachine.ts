@@ -43,6 +43,7 @@ export type UpdateHandlerType = (
 ) => void;
 
 export interface EventHandlerNameMap {
+  head: Function;
   enter: EnterExitHandlerType;
   exit: EnterExitHandlerType;
   update: UpdateHandlerType;
