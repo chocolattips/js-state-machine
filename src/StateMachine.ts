@@ -1,4 +1,4 @@
-import useStateMachineBuilder from "./StateMachineBuilder";
+import useStateMachineBuilder from "./FSMBuilder";
 
 export type KeyValueType<T> = { [key: string]: T };
 
