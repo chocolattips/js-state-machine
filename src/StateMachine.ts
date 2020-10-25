@@ -91,7 +91,7 @@ export default function _default() {
   function enter<T>(stateName: string, param?: T): DefaultType {
     _state.headStateName = stateName;
     _state.isFinished = false;
-    _state.isFinished = false;
+    _state.isEnded = false;
     setTimeout(() => {
       _enter({ from: "", to: stateName }, param);
     }, 0);
