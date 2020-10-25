@@ -74,14 +74,7 @@ export default function _default() {
   function updateData(key: string, value?: any) {
     const c = _state.currentState;
     if (c) {
-      _callback.executeUpdate(
-        {
-          state: c,
-          key,
-          value,
-        },
-        _state.sharedVariable
-      );
+      _callback.executeUpdate({ state: c, key, value }, _state.sharedVariable);
     } else {
       console.log(`x not update data : ${key}`);
     }
@@ -93,47 +86,49 @@ export default function _default() {
     _state.isFinished = false;
     _state.isEnded = false;
     setTimeout(() => {
-      _enter({ from: "", to: stateName }, param);
+      _changeState({ from: "", to: stateName }, param);
     }, 0);
     return self;
   }
 
-  function _enter(transition: ITransition, param: any) {
+  function _changeState(transition: ITransition, param: any) {
     const shared = _state.sharedVariable;
 
+    _exit(transition, shared);
+
+    const next = _state.states[transition.to] || null;
+    if (next) {
+      if (transition.to == _state.headStateName) {
+        _callback.executeEvent("head");
+        if (_state.isFinished) {
+          _end();
+          return;
+        }
+      }
+
+      _enter(next, transition, shared);
+    } else {
+      _end();
+    }
+  }
+
+  function _enter(
+    next: IState,
+    transition: ITransition,
+    shared: ISharedVariable
+  ) {
+    _state.currentState = next;
+    shared.local = {};
+
+    _callback.executeEnter({ state: next, transition }, shared);
+  }
+
+  function _exit(transition: ITransition, shared: ISharedVariable) {
     const pre = _state.currentState;
     if (pre) {
       _callback.executeExit({ state: pre, transition }, shared);
     }
-
-    const next = _state.states[transition.to] || null;
     _state.currentState = null;
-
-    if (next) {
-      if (transition.to == _state.headStateName) {
-        _callback.executeEvent("head");
-      }
-
-      if (_state.isFinished) {
-        _end();
-        return;
-      }
-
-      _state.currentState = next;
-      shared.local = {};
-
-      _callback.executeEnter(
-        {
-          state: next,
-          transition,
-        },
-        shared
-      );
-    }
-
-    if (!_state.currentState || !_state.transitions[_state.currentState.name]) {
-      _end();
-    }
   }
 
   function _end() {
@@ -163,7 +158,7 @@ export default function _default() {
     if (index != -1) {
       const t = ts[index];
       setTimeout(() => {
-        _enter(t, param);
+        _changeState(t, param);
       }, 0);
     }
     return self;
@@ -173,7 +168,7 @@ export default function _default() {
     _state.isFinished = true;
     setTimeout(() => {
       if (_state.currentState) {
-        _enter({ from: _state.currentState.name, to: "" }, null);
+        _changeState({ from: _state.currentState.name, to: "" }, null);
       } else {
         _end();
       }
