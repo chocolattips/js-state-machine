@@ -41,6 +41,13 @@ export type UpdateHandlerType = (
   variable: ISharedVariable
 ) => void;
 
+interface EventHandlerNameMap {
+  enter: EnterExitHandlerType;
+  exit: EnterExitHandlerType;
+  update: UpdateHandlerType;
+  end: Function;
+}
+
 type DefaultType = ReturnType<typeof _default>;
 
 export default function _default() {
@@ -50,8 +57,11 @@ export default function _default() {
     currentState: null as IState | null,
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
-    enterExitHandlers: {} as KeyValueType<EnterExitHandlerType>,
-    eventHandlers: {} as KeyValueType<Function>,
+    handler: {
+      enterExits: {} as KeyValueType<EnterExitHandlerType>,
+      updates: {} as KeyValueType<UpdateHandlerType>,
+      events: {} as KeyValueType<Function>,
+    },
     sharedVariable: { local: {}, global: {} } as ISharedVariable,
   };
 
@@ -60,6 +70,12 @@ export default function _default() {
   function updateData(key: string, value?: any) {
     const c = _state.currentState;
     if (c) {
+      _executeUpdateHandler(
+        "update",
+        { state: c, key, value },
+        _state.sharedVariable
+      );
+
       if (c.onUpdateMethods) {
         const h = c.onUpdateMethods[key];
         if (h) {
@@ -134,20 +150,22 @@ export default function _default() {
     return self;
   }
 
-  function on(
-    eventName: string,
-    handler: EnterExitHandlerType | Function
+  function on<K extends keyof EventHandlerNameMap>(
+    eventName: K,
+    handler: EventHandlerNameMap[K]
   ): DefaultType {
     if (eventName == "enter" || eventName == "exit") {
-      _state.enterExitHandlers[eventName] = handler as EnterExitHandlerType;
+      _state.handler.enterExits[eventName] = handler as EnterExitHandlerType;
+    } else if (eventName == "update") {
+      _state.handler.updates[eventName] = handler as UpdateHandlerType;
     } else {
-      _state.eventHandlers[eventName] = handler;
+      _state.handler.events[eventName] = handler;
     }
     return self;
   }
 
   function _executeEventHandler(eventName: string) {
-    const h = _state.eventHandlers[eventName];
+    const h = _state.handler.events[eventName];
     if (h) {
       h();
     }
@@ -158,7 +176,18 @@ export default function _default() {
     param: IEnterExitParam,
     variable: ISharedVariable
   ) {
-    const h = _state.enterExitHandlers[eventName];
+    const h = _state.handler.enterExits[eventName];
+    if (h) {
+      h(param, variable);
+    }
+  }
+
+  function _executeUpdateHandler(
+    eventName: string,
+    param: IUpdateParam,
+    variable: ISharedVariable
+  ) {
+    const h = _state.handler.updates[eventName];
     if (h) {
       h(param, variable);
     }
