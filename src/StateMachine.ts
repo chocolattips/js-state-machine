@@ -81,7 +81,7 @@ export default function _default() {
     return self;
   }
 
-  function enter<T>(stateName: string, param?: T): DefaultType {
+  function entry<T>(stateName: string, param?: T): DefaultType {
     _state.headStateName = stateName;
     _state.isFinished = false;
     _state.isEnded = false;
@@ -204,7 +204,7 @@ export default function _default() {
       return self;
     },
     updateData,
-    enter,
+    entry,
     to,
     finish,
   };
