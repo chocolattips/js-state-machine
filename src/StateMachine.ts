@@ -5,7 +5,8 @@ export type KeyValueType<T> = { [key: string]: T };
 export interface IState {
   name: string;
   onEnter?(param: IEnterExitParam, variable: ISharedVariable): void;
-  onUpdate?(param: IUpdateParam, variable: ISharedVariable): void;
+  onUpdate?: UpdateHandlerType;
+  onUpdateMethods?: { [key: string]: UpdateHandlerType };
   onExit?(param: IEnterExitParam, variable: ISharedVariable): void;
 }
 
@@ -35,6 +36,11 @@ export type EnterExitHandlerType = (
   variable: ISharedVariable
 ) => void;
 
+export type UpdateHandlerType = (
+  param: IUpdateParam,
+  variable: ISharedVariable
+) => void;
+
 type DefaultType = ReturnType<typeof _default>;
 
 export default function _default() {
@@ -53,8 +59,16 @@ export default function _default() {
 
   function updateData(key: string, value?: any) {
     const c = _state.currentState;
-    if (c && c.onUpdate) {
-      c.onUpdate({ state: c, key, value }, _state.sharedVariable);
+    if (c) {
+      if (c.onUpdateMethods) {
+        const h = c.onUpdateMethods[key];
+        if (h) {
+          h({ state: c, key, value }, _state.sharedVariable);
+        }
+      }
+      if (c.onUpdate) {
+        c.onUpdate({ state: c, key, value }, _state.sharedVariable);
+      }
     }
     return self;
   }
