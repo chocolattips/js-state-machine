@@ -71,9 +71,9 @@ export default function _default() {
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
   const _callback = useStateMachineCallback(_state.handler);
 
-  function updateData(key: string, value?: any) {
+  function updateData(key: string, value?: any, targetStateName?: string) {
     const c = _state.currentState;
-    if (c) {
+    if (c && (!targetStateName || targetStateName == c.name)) {
       _callback.executeUpdate({ state: c, key, value }, _state.sharedVariable);
     } else {
       console.log(`x not update data : ${key}`);
