@@ -42,7 +42,7 @@ export type UpdateHandlerType = (
   variable: ISharedVariable
 ) => void;
 
-interface EventHandlerNameMap {
+export interface EventHandlerNameMap {
   enter: EnterExitHandlerType;
   exit: EnterExitHandlerType;
   update: UpdateHandlerType;
@@ -67,7 +67,7 @@ export default function _default() {
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
-  const _callback = useStateMachineCallback();
+  const _callback = useStateMachineCallback(_state.handler);
 
   function updateData(key: string, value?: any) {
     const c = _state.currentState;
@@ -78,8 +78,7 @@ export default function _default() {
           key,
           value,
         },
-        _state.sharedVariable,
-        _state.handler.updates[key]
+        _state.sharedVariable
       );
     }
     return self;
@@ -97,11 +96,7 @@ export default function _default() {
 
     const pre = _state.currentState;
     if (pre) {
-      _callback.executeExit(
-        { state: pre, transition },
-        shared,
-        _state.handler.enterExits["exit"]
-      );
+      _callback.executeExit({ state: pre, transition }, shared);
     }
 
     const next = _state.states[transition.to] || null;
@@ -109,7 +104,7 @@ export default function _default() {
 
     if (next) {
       if (transition.to == _state.headStateName) {
-        _executeEventHandler("head");
+        _callback.executeEvent("head");
       }
 
       if (_state.isFinished) {
@@ -123,8 +118,7 @@ export default function _default() {
           state: next,
           transition,
         },
-        shared,
-        _state.handler.enterExits["enter"]
+        shared
       );
     }
   }
@@ -149,27 +143,6 @@ export default function _default() {
       _enter(t, param);
     }
     return self;
-  }
-
-  function on<K extends keyof EventHandlerNameMap>(
-    eventName: K,
-    handler: EventHandlerNameMap[K]
-  ): DefaultType {
-    if (eventName == "enter" || eventName == "exit") {
-      _state.handler.enterExits[eventName] = handler as EnterExitHandlerType;
-    } else if (eventName == "update") {
-      _state.handler.updates[eventName] = handler as UpdateHandlerType;
-    } else {
-      _state.handler.events[eventName] = handler;
-    }
-    return self;
-  }
-
-  function _executeEventHandler(eventName: string) {
-    const h = _state.handler.events[eventName];
-    if (h) {
-      h();
-    }
   }
 
   function finish() {
@@ -197,10 +170,16 @@ export default function _default() {
       _builder.putSequences(x);
       return self;
     },
+    on<K extends keyof EventHandlerNameMap>(
+      eventName: K,
+      handler: EventHandlerNameMap[K]
+    ) {
+      _callback.on(eventName, handler);
+      return self;
+    },
     updateData,
     enter,
     to,
-    on,
     finish,
   };
 
