@@ -1,4 +1,4 @@
-import { IState, ITransition, KeyValueType } from "./StateMachine";
+import { IState, ITransition, KeyValueType } from ".";
 
 type DefaultType = ReturnType<typeof _default>;
 

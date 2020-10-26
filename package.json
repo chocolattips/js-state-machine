@@ -2,9 +2,9 @@
   "name": "state-machine",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/StateMachine.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node ./dist/StateMachine.js",
+    "start": "node ./dist/index.js",
     "build": "webpack --config webpack.config.js",
     "package": "npm pack && tar -xvf state-machine*.tgz",
     "test": "jest"

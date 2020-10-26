@@ -6,7 +6,7 @@ import {
   IUpdateParam,
   KeyValueType,
   UpdateHandlerType,
-} from "./StateMachine";
+} from ".";
 
 interface ICallbacks {
   enterExits: KeyValueType<EnterExitHandlerType>;
