@@ -17,11 +17,13 @@ export interface ITransition {
 }
 
 export interface IEnterExitParam {
+  fsm: DefaultType;
   state: IState;
   transition: ITransition;
 }
 
 export interface IUpdateParam {
+  fsm: DefaultType;
   state: IState;
   key: string;
   value?: any;
@@ -74,7 +76,10 @@ export default function _default() {
   function updateData(key: string, value?: any, targetStateName?: string) {
     const c = _state.currentState;
     if (c && (!targetStateName || targetStateName == c.name)) {
-      _callback.executeUpdate({ state: c, key, value }, _state.sharedVariable);
+      _callback.executeUpdate(
+        { state: c, key, value, fsm: self },
+        _state.sharedVariable
+      );
     } else {
       console.log(`x not update data : ${key}`);
     }
@@ -120,13 +125,13 @@ export default function _default() {
     _state.currentState = next;
     shared.local = {};
 
-    _callback.executeEnter({ state: next, transition }, shared);
+    _callback.executeEnter({ state: next, transition, fsm: self }, shared);
   }
 
   function _exit(transition: ITransition, shared: ISharedVariable) {
     const pre = _state.currentState;
     if (pre) {
-      _callback.executeExit({ state: pre, transition }, shared);
+      _callback.executeExit({ state: pre, transition, fsm: self }, shared);
     }
     _state.currentState = null;
   }
