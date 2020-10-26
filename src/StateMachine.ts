@@ -180,34 +180,41 @@ export default function _default() {
     }, 0);
   }
 
+  function putStates(x: IState[]): DefaultType {
+    _builder.putStates(x);
+    return self;
+  }
+  function putState(x: IState): DefaultType {
+    _builder.putState(x);
+    return self;
+  }
+  function putTransitions(x: ITransition[]): DefaultType {
+    _builder.putTransitions(x);
+    return self;
+  }
+  function putTransition(x: ITransition): DefaultType {
+    _builder.putTransition(x);
+    return self;
+  }
+  function putSequences(x: IState[]): DefaultType {
+    _builder.putSequences(x);
+    return self;
+  }
+  function on<K extends keyof EventHandlerNameMap>(
+    eventName: K,
+    handler: EventHandlerNameMap[K]
+  ): DefaultType {
+    _callback.on(eventName, handler);
+    return self;
+  }
+
   const self = {
-    putStates(x: IState[]) {
-      _builder.putStates(x);
-      return self;
-    },
-    putState(x: IState) {
-      _builder.putState(x);
-      return self;
-    },
-    putTransitions(x: ITransition[]) {
-      _builder.putTransitions(x);
-      return self;
-    },
-    putTransition(x: ITransition) {
-      _builder.putTransition(x);
-      return self;
-    },
-    putSequences(x: IState[]) {
-      _builder.putSequences(x);
-      return self;
-    },
-    on<K extends keyof EventHandlerNameMap>(
-      eventName: K,
-      handler: EventHandlerNameMap[K]
-    ) {
-      _callback.on(eventName, handler);
-      return self;
-    },
+    putStates,
+    putState,
+    putTransitions,
+    putTransition,
+    putSequences,
+    on,
     updateData,
     entry,
     to,

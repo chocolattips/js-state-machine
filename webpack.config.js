@@ -1,8 +1,9 @@
 module.exports = {
-  entry: "./src/index.ts",
-  target: "node",
+  entry: "./src/StateMachine.ts",
+  // target: "node",
+  // mode: "development",
   output: {
-    filename: "index.js",
+    filename: "StateMachine.js",
     path: `${__dirname}/dist`,
     libraryTarget: "commonjs2",
   },
