@@ -29,6 +29,8 @@ export interface IUpdateParam {
   value?: any;
 }
 
+export interface IEventParam {}
+
 export interface ISharedVariable {
   local: KeyValueType<any>;
   global: KeyValueType<any>;
@@ -44,12 +46,17 @@ export type UpdateHandlerType = (
   variable: ISharedVariable
 ) => void;
 
+export type EventHandlerType = (
+  param: IEventParam,
+  variable: ISharedVariable
+) => void;
+
 export interface EventHandlerNameMap {
-  head: Function;
+  head: EventHandlerType;
   enter: EnterExitHandlerType;
   exit: EnterExitHandlerType;
   update: UpdateHandlerType;
-  end: Function;
+  end: EventHandlerType;
 }
 
 type DefaultType = ReturnType<typeof _default>;
@@ -65,7 +72,7 @@ export default function _default() {
     handler: {
       enterExits: {} as KeyValueType<EnterExitHandlerType>,
       updates: {} as KeyValueType<UpdateHandlerType>,
-      events: {} as KeyValueType<Function>,
+      events: {} as KeyValueType<EventHandlerType>,
     },
     sharedVariable: { local: {}, global: {} } as ISharedVariable,
   };
@@ -106,7 +113,7 @@ export default function _default() {
         const next = _state.states[transition.to] || null;
         if (next) {
           if (transition.to == _state.headStateName) {
-            _callback.executeEvent("head");
+            _callback.executeEvent("head", {}, shared);
             if (_state.isFinished) {
               _end();
               resolve();
@@ -149,7 +156,7 @@ export default function _default() {
     }
 
     _state.isEnded = true;
-    _callback.executeEvent("end");
+    _callback.executeEvent("end", {}, _state.sharedVariable);
   }
 
   function to(stateName: string, param?: any, current?: IState) {

@@ -1,7 +1,9 @@
 import {
   EnterExitHandlerType,
   EventHandlerNameMap,
+  EventHandlerType,
   IEnterExitParam,
+  IEventParam,
   ISharedVariable,
   IUpdateParam,
   KeyValueType,
@@ -11,7 +13,7 @@ import {
 interface ICallbacks {
   enterExits: KeyValueType<EnterExitHandlerType>;
   updates: KeyValueType<UpdateHandlerType>;
-  events: KeyValueType<Function>;
+  events: KeyValueType<EventHandlerType>;
 }
 
 export default function _default(callbacks: ICallbacks) {
@@ -57,10 +59,14 @@ export default function _default(callbacks: ICallbacks) {
     }
   }
 
-  function executeEvent(eventName: string) {
+  function executeEvent(
+    eventName: string,
+    param: IEventParam,
+    variable: ISharedVariable
+  ) {
     const handler = callbacks.events[eventName];
     if (handler) {
-      handler();
+      handler(param, variable);
     }
   }
 
@@ -73,7 +79,7 @@ export default function _default(callbacks: ICallbacks) {
     } else if (eventName == "update") {
       callbacks.updates[eventName] = handler as UpdateHandlerType;
     } else {
-      callbacks.events[eventName] = handler;
+      callbacks.events[eventName] = handler as EventHandlerType;
     }
   }
 
