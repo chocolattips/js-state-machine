@@ -29,7 +29,10 @@ export interface IUpdateParam {
   value?: any;
 }
 
-export interface IEventParam {}
+export interface IEventParam {
+  eventName: string;
+  data?: any;
+}
 
 export interface ISharedVariable {
   local: KeyValueType<any>;
@@ -54,8 +57,8 @@ export type EventHandlerType = (
 export interface EventHandlerNameMap {
   head: EventHandlerType;
   enter: EnterExitHandlerType;
-  exit: EnterExitHandlerType;
   update: UpdateHandlerType;
+  exit: EnterExitHandlerType;
   end: EventHandlerType;
 }
 
@@ -113,7 +116,7 @@ export default function _default() {
         const next = _state.states[transition.to] || null;
         if (next) {
           if (transition.to == _state.headStateName) {
-            _callback.executeEvent("head", {}, shared);
+            _callback.executeEvent({ eventName: "head" }, shared);
             if (_state.isFinished) {
               _end();
               resolve();
@@ -156,7 +159,7 @@ export default function _default() {
     }
 
     _state.isEnded = true;
-    _callback.executeEvent("end", {}, _state.sharedVariable);
+    _callback.executeEvent({ eventName: "end" }, _state.sharedVariable);
   }
 
   function to(stateName: string, param?: any, current?: IState) {

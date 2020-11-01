@@ -59,12 +59,8 @@ export default function _default(callbacks: ICallbacks) {
     }
   }
 
-  function executeEvent(
-    eventName: string,
-    param: IEventParam,
-    variable: ISharedVariable
-  ) {
-    const handler = callbacks.events[eventName];
+  function executeEvent(param: IEventParam, variable: ISharedVariable) {
+    const handler = callbacks.events[param.eventName];
     if (handler) {
       handler(param, variable);
     }
