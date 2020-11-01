@@ -16,6 +16,12 @@ export interface ITransition {
   to: string;
 }
 
+export interface IStateContext {
+  to: (stateName: string, param?: any, current?: IState) => void;
+  finish: () => void;
+  emit: (eventName: string, data?: any) => void;
+}
+
 export interface IEnterExitParam {
   fsm: DefaultType;
   state: IState;
@@ -58,6 +64,7 @@ export interface EventHandlerNameMap {
   head: EventHandlerType;
   enter: EnterExitHandlerType;
   update: UpdateHandlerType;
+  emit: EventHandlerType;
   exit: EnterExitHandlerType;
   end: EventHandlerType;
 }
@@ -116,7 +123,7 @@ export default function _default() {
         const next = _state.states[transition.to] || null;
         if (next) {
           if (transition.to == _state.headStateName) {
-            _callback.executeEvent({ eventName: "head" }, shared);
+            _callback.executeEvent("head", { eventName: "head" }, shared);
             if (_state.isFinished) {
               _end();
               resolve();
@@ -159,7 +166,7 @@ export default function _default() {
     }
 
     _state.isEnded = true;
-    _callback.executeEvent({ eventName: "end" }, _state.sharedVariable);
+    _callback.executeEvent("end", { eventName: "end" }, _state.sharedVariable);
   }
 
   function to(stateName: string, param?: any, current?: IState) {
@@ -201,6 +208,10 @@ export default function _default() {
 
       resolve();
     });
+  }
+
+  function emit(eventName: string, data?: any) {
+    _callback.executeEvent("emit", { eventName, data }, _state.sharedVariable);
   }
 
   function putStates(x: IState[]): DefaultType {
@@ -247,6 +258,7 @@ export default function _default() {
     entry,
     to,
     finish,
+    emit,
   };
 
   return self;

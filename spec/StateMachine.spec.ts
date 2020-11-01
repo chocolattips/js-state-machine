@@ -49,4 +49,29 @@ describe("StateMachine", () => {
       expect(o.fsm._.state.isEnded).toBeTruthy();
     });
   });
+
+  describe("emit", () => {
+    it("", (done) => {
+      const eventName = "hello-world";
+      const eventData = { hello: "WORLD" };
+
+      useStateMachine()
+        .putState({
+          name: "hello",
+          onEnter(param) {
+            param.fsm.emit(eventName, eventData);
+          },
+        })
+        .on("emit", (param) => {
+          try {
+            expect(param.eventName).toEqual(eventName);
+            expect(param.data).toEqual(eventData);
+            done();
+          } catch (e) {
+            done(e);
+          }
+        })
+        .entry("hello");
+    });
+  });
 });
