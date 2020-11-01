@@ -14,6 +14,7 @@ interface ICallbacks {
   enterExits: KeyValueType<EnterExitHandlerType>;
   updates: KeyValueType<UpdateHandlerType>;
   events: KeyValueType<EventHandlerType>;
+  emits: KeyValueType<EventHandlerType>;
 }
 
 export default function _default(callbacks: ICallbacks) {
@@ -70,6 +71,14 @@ export default function _default(callbacks: ICallbacks) {
     }
   }
 
+  function executeEmit(param: IEventParam, variable: ISharedVariable) {
+    executeEvent("emit", param, variable);
+    const handler = callbacks.emits[param.eventName];
+    if (handler) {
+      handler(param, variable);
+    }
+  }
+
   function on<K extends keyof EventHandlerNameMap>(
     eventName: K,
     handler: EventHandlerNameMap[K]
@@ -83,12 +92,20 @@ export default function _default(callbacks: ICallbacks) {
     }
   }
 
+  function onEmitMethods(methods: { [key: string]: EventHandlerType }) {
+    for (const key in methods) {
+      callbacks.emits[key] = methods[key];
+    }
+  }
+
   const self = {
     executeEnter,
     executeExit,
     executeUpdate,
     executeEvent,
+    executeEmit,
     on,
+    onEmitMethods,
   };
 
   return self;

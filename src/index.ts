@@ -83,6 +83,7 @@ export default function _default() {
       enterExits: {} as KeyValueType<EnterExitHandlerType>,
       updates: {} as KeyValueType<UpdateHandlerType>,
       events: {} as KeyValueType<EventHandlerType>,
+      emits: {} as KeyValueType<EventHandlerType>,
     },
     sharedVariable: { local: {}, global: {} } as ISharedVariable,
   };
@@ -210,10 +211,6 @@ export default function _default() {
     });
   }
 
-  function emit(eventName: string, data?: any) {
-    _callback.executeEvent("emit", { eventName, data }, _state.sharedVariable);
-  }
-
   function putStates(x: IState[]): DefaultType {
     _builder.putStates(x);
     return self;
@@ -234,11 +231,18 @@ export default function _default() {
     _builder.putSequences(x);
     return self;
   }
+  function emit(eventName: string, data?: any) {
+    _callback.executeEmit({ eventName, data }, _state.sharedVariable);
+  }
   function on<K extends keyof EventHandlerNameMap>(
     eventName: K,
     handler: EventHandlerNameMap[K]
   ): DefaultType {
     _callback.on(eventName, handler);
+    return self;
+  }
+  function onEmitMethods(methods: { [key: string]: EventHandlerType }) {
+    _callback.onEmitMethods(methods);
     return self;
   }
 
@@ -259,6 +263,7 @@ export default function _default() {
     to,
     finish,
     emit,
+    onEmitMethods,
   };
 
   return self;

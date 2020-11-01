@@ -51,21 +51,50 @@ describe("StateMachine", () => {
   });
 
   describe("emit", () => {
-    it("", (done) => {
-      const eventName = "hello-world";
+    function setup() {
+      const eventName = "helloworld";
       const eventData = { hello: "WORLD" };
 
-      useStateMachine()
-        .putState({
-          name: "hello",
-          onEnter(param) {
-            param.fsm.emit(eventName, eventData);
+      const fsm = useStateMachine().putState({
+        name: "hello",
+        onEnter(param) {
+          param.fsm.emit(eventName, eventData);
+        },
+      });
+
+      return {
+        fsm,
+        eventName,
+        eventData,
+      };
+    }
+
+    it("onEmitMethods", (done) => {
+      const o = setup();
+
+      o.fsm
+        .onEmitMethods({
+          helloworld: (param) => {
+            try {
+              expect(param.eventName).toEqual(o.eventName);
+              expect(param.data).toEqual(o.eventData);
+              done();
+            } catch (e) {
+              done(e);
+            }
           },
         })
+        .entry("hello");
+    });
+
+    it("on emit", (done) => {
+      const o = setup();
+
+      o.fsm
         .on("emit", (param) => {
           try {
-            expect(param.eventName).toEqual(eventName);
-            expect(param.data).toEqual(eventData);
+            expect(param.eventName).toEqual(o.eventName);
+            expect(param.data).toEqual(o.eventData);
             done();
           } catch (e) {
             done(e);
