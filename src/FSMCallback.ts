@@ -1,8 +1,10 @@
 import {
-  EnterExitHandlerType,
+  EnterHandlerType,
+  ExitHandlerType,
   EventHandlerNameMap,
   EventHandlerType,
-  IEnterExitParam,
+  IEnterParam,
+  IExitParam,
   IEventParam,
   ISharedVariable,
   IUpdateParam,
@@ -11,15 +13,16 @@ import {
 } from "./FSMInterface";
 
 interface ICallbacks {
-  enterExits: KeyValueType<EnterExitHandlerType>;
+  enter: EnterHandlerType | null;
+  exit: ExitHandlerType | null;
   updates: KeyValueType<UpdateHandlerType>;
   events: KeyValueType<EventHandlerType>;
   emits: KeyValueType<EventHandlerType>;
 }
 
 export default function _default(callbacks: ICallbacks) {
-  function executeEnter(param: IEnterExitParam, variable: ISharedVariable) {
-    const handler = callbacks.enterExits["enter"];
+  function executeEnter(param: IEnterParam, variable: ISharedVariable) {
+    const handler = callbacks.enter;
     if (handler) {
       handler(param, variable);
     }
@@ -30,8 +33,8 @@ export default function _default(callbacks: ICallbacks) {
     }
   }
 
-  function executeExit(param: IEnterExitParam, variable: ISharedVariable) {
-    const handler = callbacks.enterExits["exit"];
+  function executeExit(param: IExitParam, variable: ISharedVariable) {
+    const handler = callbacks.exit;
     if (handler) {
       handler(param, variable);
     }
@@ -83,8 +86,10 @@ export default function _default(callbacks: ICallbacks) {
     eventName: K,
     handler: EventHandlerNameMap[K]
   ) {
-    if (eventName == "enter" || eventName == "exit") {
-      callbacks.enterExits[eventName] = handler as EnterExitHandlerType;
+    if (eventName == "enter") {
+      callbacks.enter = handler as EnterHandlerType;
+    } else if (eventName == "exit") {
+      callbacks.exit = handler as ExitHandlerType;
     } else if (eventName == "update") {
       callbacks.updates[eventName] = handler as UpdateHandlerType;
     } else {

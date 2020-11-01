@@ -22,6 +22,22 @@ describe("StateMachine", () => {
       await o.fsm.entry(o.states[0].name);
       expect(o.fsmState.currentState).toEqual(o.states[0]);
     });
+
+    it("argument", async (done) => {
+      const o = setupSequences();
+
+      const argument = { hello: 1234 };
+      o.fsm.on("enter", (param) => {
+        try {
+          expect(param.argument).toEqual(argument);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+
+      await o.fsm.entry(o.states[0].name, argument);
+    });
   });
 
   describe("to", () => {
@@ -32,6 +48,23 @@ describe("StateMachine", () => {
       expect(o.fsmState.currentState).toEqual(o.states[0]);
       await o.fsm.to(o.states[1].name);
       expect(o.fsmState.currentState).toEqual(o.states[1]);
+    });
+
+    it("argument", async (done) => {
+      const o = setupSequences();
+      await o.fsm.entry(o.states[0].name);
+
+      const argument = { hello: 1234 };
+      o.fsm.on("enter", (param) => {
+        try {
+          expect(param.argument).toEqual(argument);
+          done();
+        } catch (e) {
+          done(e);
+        }
+      });
+
+      await o.fsm.to(o.states[1].name, argument);
     });
   });
 

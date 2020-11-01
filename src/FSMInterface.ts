@@ -2,10 +2,10 @@ export type KeyValueType<T> = { [key: string]: T };
 
 export interface IState {
   name: string;
-  onEnter?(param: IEnterExitParam, variable: ISharedVariable): void;
+  onEnter?(param: IEnterParam, variable: ISharedVariable): void;
   onUpdate?: UpdateHandlerType;
   onUpdateMethods?: { [key: string]: UpdateHandlerType };
-  onExit?(param: IEnterExitParam, variable: ISharedVariable): void;
+  onExit?(param: IExitParam, variable: ISharedVariable): void;
 }
 
 export interface ITransition {
@@ -19,7 +19,14 @@ export interface IStateContext {
   emit: (eventName: string, data?: any) => void;
 }
 
-export interface IEnterExitParam {
+export interface IEnterParam {
+  context: IStateContext;
+  state: IState;
+  transition: ITransition;
+  argument?: any;
+}
+
+export interface IExitParam {
   context: IStateContext;
   state: IState;
   transition: ITransition;
@@ -42,8 +49,13 @@ export interface ISharedVariable {
   global: KeyValueType<any>;
 }
 
-export type EnterExitHandlerType = (
-  param: IEnterExitParam,
+export type EnterHandlerType = (
+  param: IEnterParam,
+  variable: ISharedVariable
+) => void;
+
+export type ExitHandlerType = (
+  param: IEnterParam,
   variable: ISharedVariable
 ) => void;
 
@@ -59,9 +71,9 @@ export type EventHandlerType = (
 
 export interface EventHandlerNameMap {
   head: EventHandlerType;
-  enter: EnterExitHandlerType;
+  enter: EnterHandlerType;
   update: UpdateHandlerType;
   emit: EventHandlerType;
-  exit: EnterExitHandlerType;
+  exit: ExitHandlerType;
   end: EventHandlerType;
 }

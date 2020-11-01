@@ -4,7 +4,8 @@ import {
   KeyValueType,
   IState,
   ITransition,
-  EnterExitHandlerType,
+  EnterHandlerType,
+  ExitHandlerType,
   UpdateHandlerType,
   EventHandlerType,
   ISharedVariable,
@@ -22,7 +23,8 @@ export default function _default() {
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
     handler: {
-      enterExits: {} as KeyValueType<EnterExitHandlerType>,
+      enter: null as EnterHandlerType | null,
+      exit: null as ExitHandlerType | null,
       updates: {} as KeyValueType<UpdateHandlerType>,
       events: {} as KeyValueType<EventHandlerType>,
       emits: {} as KeyValueType<EventHandlerType>,
@@ -46,17 +48,17 @@ export default function _default() {
     return self;
   }
 
-  function entry<T>(stateName: string, param?: T) {
+  function entry<T>(stateName: string, argument?: T) {
     return new Promise(async (resolve, reject) => {
       _state.headStateName = stateName;
       _state.isFinished = false;
       _state.isEnded = false;
-      await _changeState({ from: "", to: stateName }, param);
+      await _changeState({ from: "", to: stateName }, argument);
       resolve();
     });
   }
 
-  function _changeState(transition: ITransition, param: any) {
+  function _changeState(transition: ITransition, argument: any) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const shared = _state.sharedVariable;
@@ -74,7 +76,7 @@ export default function _default() {
             }
           }
 
-          _enter(next, transition, shared);
+          _enter(next, argument, transition, shared);
         } else {
           _end();
         }
@@ -86,13 +88,17 @@ export default function _default() {
 
   function _enter(
     next: IState,
+    argument: any,
     transition: ITransition,
     shared: ISharedVariable
   ) {
     _state.currentState = next;
     shared.local = {};
 
-    _callback.executeEnter({ state: next, transition, context: self }, shared);
+    _callback.executeEnter(
+      { state: next, transition, context: self, argument },
+      shared
+    );
   }
 
   function _exit(transition: ITransition, shared: ISharedVariable) {
@@ -112,7 +118,7 @@ export default function _default() {
     _callback.executeEvent("end", { eventName: "end" }, _state.sharedVariable);
   }
 
-  function to(stateName: string, param?: any, current?: IState) {
+  function to(stateName: string, argument?: any, current?: IState) {
     return new Promise(async (resolve, reject) => {
       if (!_state.currentState) {
         resolve();
@@ -133,7 +139,7 @@ export default function _default() {
       const index = ts.findIndex((x) => x.to == stateName);
       if (index != -1) {
         const t = ts[index];
-        await _changeState(t, param);
+        await _changeState(t, argument);
       }
 
       resolve();
