@@ -8,7 +8,7 @@ import {
   IUpdateParam,
   KeyValueType,
   UpdateHandlerType,
-} from ".";
+} from "./FSMInterface";
 
 interface ICallbacks {
   enterExits: KeyValueType<EnterExitHandlerType>;

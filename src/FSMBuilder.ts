@@ -1,4 +1,4 @@
-import { IState, ITransition, KeyValueType } from ".";
+import { IState, ITransition, KeyValueType } from "./FSMInterface";
 
 type DefaultType = ReturnType<typeof _default>;
 
