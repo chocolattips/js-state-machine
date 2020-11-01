@@ -183,7 +183,9 @@ export default function _default() {
     _callback.on(eventName, handler);
     return self;
   }
-  function onEmitMethods(methods: { [key: string]: EventHandlerType }) {
+  function onEmitMethods(methods: {
+    [key: string]: EventHandlerType;
+  }): DefaultType {
     _callback.onEmitMethods(methods);
     return self;
   }
