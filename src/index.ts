@@ -86,35 +86,42 @@ export default function _default() {
     return self;
   }
 
-  function entry<T>(stateName: string, param?: T): DefaultType {
-    _state.headStateName = stateName;
-    _state.isFinished = false;
-    _state.isEnded = false;
-    setTimeout(() => {
-      _changeState({ from: "", to: stateName }, param);
-    }, 0);
-    return self;
+  function entry<T>(stateName: string, param?: T) {
+    return new Promise(async (resolve, reject) => {
+      _state.headStateName = stateName;
+      _state.isFinished = false;
+      _state.isEnded = false;
+      await _changeState({ from: "", to: stateName }, param);
+      resolve();
+    });
   }
 
   function _changeState(transition: ITransition, param: any) {
-    const shared = _state.sharedVariable;
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const shared = _state.sharedVariable;
 
-    _exit(transition, shared);
+        _exit(transition, shared);
 
-    const next = _state.states[transition.to] || null;
-    if (next) {
-      if (transition.to == _state.headStateName) {
-        _callback.executeEvent("head");
-        if (_state.isFinished) {
+        const next = _state.states[transition.to] || null;
+        if (next) {
+          if (transition.to == _state.headStateName) {
+            _callback.executeEvent("head");
+            if (_state.isFinished) {
+              _end();
+              resolve();
+              return;
+            }
+          }
+
+          _enter(next, transition, shared);
+        } else {
           _end();
-          return;
         }
-      }
 
-      _enter(next, transition, shared);
-    } else {
-      _end();
-    }
+        resolve();
+      }, 0);
+    });
   }
 
   function _enter(
@@ -145,39 +152,45 @@ export default function _default() {
     _callback.executeEvent("end");
   }
 
-  function to(stateName: string, param?: any, current?: IState): DefaultType {
-    if (!_state.currentState) {
-      return self;
-    }
+  function to(stateName: string, param?: any, current?: IState) {
+    return new Promise(async (resolve, reject) => {
+      if (!_state.currentState) {
+        resolve();
+        return;
+      }
 
-    if (current && current.name != _state.currentState.name) {
-      return self;
-    }
+      if (current && current.name != _state.currentState.name) {
+        resolve();
+        return;
+      }
 
-    const ts = _state.transitions[_state.currentState.name];
-    if (!ts) {
-      return self;
-    }
+      const ts = _state.transitions[_state.currentState.name];
+      if (!ts) {
+        resolve();
+        return;
+      }
 
-    const index = ts.findIndex((x) => x.to == stateName);
-    if (index != -1) {
-      const t = ts[index];
-      setTimeout(() => {
-        _changeState(t, param);
-      }, 0);
-    }
-    return self;
+      const index = ts.findIndex((x) => x.to == stateName);
+      if (index != -1) {
+        const t = ts[index];
+        await _changeState(t, param);
+      }
+
+      resolve();
+    });
   }
 
   function finish() {
-    _state.isFinished = true;
-    setTimeout(() => {
+    return new Promise(async (resolve, reject) => {
+      _state.isFinished = true;
       if (_state.currentState) {
-        _changeState({ from: _state.currentState.name, to: "" }, null);
+        await _changeState({ from: _state.currentState.name, to: "" }, null);
       } else {
         _end();
       }
-    }, 0);
+
+      resolve();
+    });
   }
 
   function putStates(x: IState[]): DefaultType {
@@ -208,7 +221,12 @@ export default function _default() {
     return self;
   }
 
+  const _ = {
+    state: _state,
+  };
+
   const self = {
+    _,
     putStates,
     putState,
     putTransitions,
