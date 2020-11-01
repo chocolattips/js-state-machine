@@ -37,7 +37,7 @@ export default function _default() {
     const c = _state.currentState;
     if (c && (!targetStateName || targetStateName == c.name)) {
       _callback.executeUpdate(
-        { state: c, key, value, fsm: self },
+        { state: c, key, value, context: self },
         _state.sharedVariable
       );
     } else {
@@ -92,13 +92,13 @@ export default function _default() {
     _state.currentState = next;
     shared.local = {};
 
-    _callback.executeEnter({ state: next, transition, fsm: self }, shared);
+    _callback.executeEnter({ state: next, transition, context: self }, shared);
   }
 
   function _exit(transition: ITransition, shared: ISharedVariable) {
     const pre = _state.currentState;
     if (pre) {
-      _callback.executeExit({ state: pre, transition, fsm: self }, shared);
+      _callback.executeExit({ state: pre, transition, context: self }, shared);
     }
     _state.currentState = null;
   }

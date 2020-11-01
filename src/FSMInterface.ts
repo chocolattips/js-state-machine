@@ -20,13 +20,13 @@ export interface IStateContext {
 }
 
 export interface IEnterExitParam {
-  fsm: IStateContext;
+  context: IStateContext;
   state: IState;
   transition: ITransition;
 }
 
 export interface IUpdateParam {
-  fsm: IStateContext;
+  context: IStateContext;
   state: IState;
   key: string;
   value?: any;

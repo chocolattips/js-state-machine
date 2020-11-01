@@ -58,7 +58,7 @@ describe("StateMachine", () => {
       const fsm = useStateMachine().putState({
         name: "hello",
         onEnter(param) {
-          param.fsm.emit(eventName, eventData);
+          param.context.emit(eventName, eventData);
         },
       });
 
