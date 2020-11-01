@@ -1,63 +1,225 @@
-import useStateMachine from "./StateMachine";
+import useStateMachineBuilder from "./FSMBuilder";
+import useStateMachineCallback from "./FSMCallback";
 
-useStateMachine()
-  .putState({
-    name: "hello",
-    onEnter(transition, param) {
-      console.log(`+ hello`);
-      console.log(transition);
-      console.log(param);
+export type KeyValueType<T> = { [key: string]: T };
+
+export interface IState {
+  name: string;
+  onEnter?(param: IEnterExitParam, variable: ISharedVariable): void;
+  onUpdate?: UpdateHandlerType;
+  onUpdateMethods?: { [key: string]: UpdateHandlerType };
+  onExit?(param: IEnterExitParam, variable: ISharedVariable): void;
+}
+
+export interface ITransition {
+  from: string;
+  to: string;
+}
+
+export interface IEnterExitParam {
+  fsm: DefaultType;
+  state: IState;
+  transition: ITransition;
+}
+
+export interface IUpdateParam {
+  fsm: DefaultType;
+  state: IState;
+  key: string;
+  value?: any;
+}
+
+export interface ISharedVariable {
+  local: KeyValueType<any>;
+  global: KeyValueType<any>;
+}
+
+export type EnterExitHandlerType = (
+  param: IEnterExitParam,
+  variable: ISharedVariable
+) => void;
+
+export type UpdateHandlerType = (
+  param: IUpdateParam,
+  variable: ISharedVariable
+) => void;
+
+export interface EventHandlerNameMap {
+  head: Function;
+  enter: EnterExitHandlerType;
+  exit: EnterExitHandlerType;
+  update: UpdateHandlerType;
+  end: Function;
+}
+
+type DefaultType = ReturnType<typeof _default>;
+
+export default function _default() {
+  const _state = {
+    headStateName: "",
+    isFinished: false,
+    isEnded: false,
+    currentState: null as IState | null,
+    states: {} as KeyValueType<IState>,
+    transitions: {} as KeyValueType<ITransition[]>,
+    handler: {
+      enterExits: {} as KeyValueType<EnterExitHandlerType>,
+      updates: {} as KeyValueType<UpdateHandlerType>,
+      events: {} as KeyValueType<Function>,
     },
-    onExit(transition) {
-      console.log("- hello");
-      console.log(transition);
-    },
-  })
-  .putState({
-    name: "world",
-    onEnter(transition, param) {
-      console.log("+ world");
-      console.log(transition);
-      console.log(param);
-    },
-    onExit(transition) {
-      console.log("- world");
-      console.log(transition);
-    },
-  })
-  .putState({
-    name: "apple",
-    onEnter(transition, param) {
-      console.log("+ apple");
-      console.log(transition);
-      console.log(param);
-    },
-    onExit(transition) {
-      console.log("- apple");
-      console.log(transition);
-    },
-  })
-  .putTransition({
-    from: "hello",
-    to: "world",
-  })
-  .putTransition({
-    from: "world",
-    to: "apple",
-  })
-  .putTransition({
-    from: "apple",
-    to: "world",
-  })
-  .on("enter", (param: any) => {
-    console.log("---- enter >> ");
-    console.log(param);
-  })
-  .on("exit", (param: any) => {
-    console.log("<<");
-    console.log(param);
-  })
-  .enter("hello", { abc: 123 })
-  .to("world", { bbb: "ccc" })
-  .to("apple", { test: 111 })
-  .to("world");
+    sharedVariable: { local: {}, global: {} } as ISharedVariable,
+  };
+
+  const _builder = useStateMachineBuilder(_state.states, _state.transitions);
+  const _callback = useStateMachineCallback(_state.handler);
+
+  function updateData(key: string, value?: any, targetStateName?: string) {
+    const c = _state.currentState;
+    if (c && (!targetStateName || targetStateName == c.name)) {
+      _callback.executeUpdate(
+        { state: c, key, value, fsm: self },
+        _state.sharedVariable
+      );
+    } else {
+      console.log(`x not update data : ${key}`);
+    }
+    return self;
+  }
+
+  function entry<T>(stateName: string, param?: T): DefaultType {
+    _state.headStateName = stateName;
+    _state.isFinished = false;
+    _state.isEnded = false;
+    setTimeout(() => {
+      _changeState({ from: "", to: stateName }, param);
+    }, 0);
+    return self;
+  }
+
+  function _changeState(transition: ITransition, param: any) {
+    const shared = _state.sharedVariable;
+
+    _exit(transition, shared);
+
+    const next = _state.states[transition.to] || null;
+    if (next) {
+      if (transition.to == _state.headStateName) {
+        _callback.executeEvent("head");
+        if (_state.isFinished) {
+          _end();
+          return;
+        }
+      }
+
+      _enter(next, transition, shared);
+    } else {
+      _end();
+    }
+  }
+
+  function _enter(
+    next: IState,
+    transition: ITransition,
+    shared: ISharedVariable
+  ) {
+    _state.currentState = next;
+    shared.local = {};
+
+    _callback.executeEnter({ state: next, transition, fsm: self }, shared);
+  }
+
+  function _exit(transition: ITransition, shared: ISharedVariable) {
+    const pre = _state.currentState;
+    if (pre) {
+      _callback.executeExit({ state: pre, transition, fsm: self }, shared);
+    }
+    _state.currentState = null;
+  }
+
+  function _end() {
+    if (_state.isEnded) {
+      return;
+    }
+
+    _state.isEnded = true;
+    _callback.executeEvent("end");
+  }
+
+  function to(stateName: string, param?: any, current?: IState): DefaultType {
+    if (!_state.currentState) {
+      return self;
+    }
+
+    if (current && current.name != _state.currentState.name) {
+      return self;
+    }
+
+    const ts = _state.transitions[_state.currentState.name];
+    if (!ts) {
+      return self;
+    }
+
+    const index = ts.findIndex((x) => x.to == stateName);
+    if (index != -1) {
+      const t = ts[index];
+      setTimeout(() => {
+        _changeState(t, param);
+      }, 0);
+    }
+    return self;
+  }
+
+  function finish() {
+    _state.isFinished = true;
+    setTimeout(() => {
+      if (_state.currentState) {
+        _changeState({ from: _state.currentState.name, to: "" }, null);
+      } else {
+        _end();
+      }
+    }, 0);
+  }
+
+  function putStates(x: IState[]): DefaultType {
+    _builder.putStates(x);
+    return self;
+  }
+  function putState(x: IState): DefaultType {
+    _builder.putState(x);
+    return self;
+  }
+  function putTransitions(x: ITransition[]): DefaultType {
+    _builder.putTransitions(x);
+    return self;
+  }
+  function putTransition(x: ITransition): DefaultType {
+    _builder.putTransition(x);
+    return self;
+  }
+  function putSequences(x: IState[]): DefaultType {
+    _builder.putSequences(x);
+    return self;
+  }
+  function on<K extends keyof EventHandlerNameMap>(
+    eventName: K,
+    handler: EventHandlerNameMap[K]
+  ): DefaultType {
+    _callback.on(eventName, handler);
+    return self;
+  }
+
+  const self = {
+    putStates,
+    putState,
+    putTransitions,
+    putTransition,
+    putSequences,
+    on,
+    updateData,
+    entry,
+    to,
+    finish,
+  };
+
+  return self;
+}

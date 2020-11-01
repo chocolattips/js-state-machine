@@ -1,9 +1,10 @@
 module.exports = {
   entry: "./src/index.ts",
-  target: "node",
+  // target: "node",
+  // mode: "development",
   output: {
     filename: "index.js",
-    path: `${__dirname}/dist`,
+    path: `${__dirname}/dist/`,
     libraryTarget: "commonjs2",
   },
   module: {
