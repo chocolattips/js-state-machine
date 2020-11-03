@@ -1,5 +1,6 @@
 import useStateMachineBuilder from "./FSMBuilder";
 import useStateMachineCallback from "./FSMCallback";
+import useStateMachineSetState from "./FSMSetState";
 import {
   KeyValueType,
   IState,
@@ -34,6 +35,7 @@ export default function _default() {
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
   const _callback = useStateMachineCallback(_state.handler);
+  const _setState = useStateMachineSetState(_state, _callback);
 
   function updateData(key: string, value?: any, targetStateName?: string) {
     const c = _state.currentState;
@@ -63,59 +65,27 @@ export default function _default() {
       setTimeout(() => {
         const shared = _state.sharedVariable;
 
-        _exit(transition, shared);
+        _setState.exit(transition, self);
 
         const next = _state.states[transition.to] || null;
         if (next) {
           if (transition.to == _state.headStateName) {
             _callback.executeEvent("head", { eventName: "head" }, shared);
             if (_state.isFinished) {
-              _end();
+              _setState.end();
               resolve();
               return;
             }
           }
 
-          _enter(next, argument, transition, shared);
+          _setState.enter(next, argument, transition, self);
         } else {
-          _end();
+          _setState.end();
         }
 
         resolve();
       }, 0);
     });
-  }
-
-  function _enter(
-    next: IState,
-    argument: any,
-    transition: ITransition,
-    shared: ISharedVariable
-  ) {
-    _state.currentState = next;
-    shared.local = {};
-
-    _callback.executeEnter(
-      { state: next, transition, context: self, argument },
-      shared
-    );
-  }
-
-  function _exit(transition: ITransition, shared: ISharedVariable) {
-    const pre = _state.currentState;
-    if (pre) {
-      _callback.executeExit({ state: pre, transition, context: self }, shared);
-    }
-    _state.currentState = null;
-  }
-
-  function _end() {
-    if (_state.isEnded) {
-      return;
-    }
-
-    _state.isEnded = true;
-    _callback.executeEvent("end", { eventName: "end" }, _state.sharedVariable);
   }
 
   function to(stateName: string, argument?: any, current?: IState) {
@@ -152,7 +122,7 @@ export default function _default() {
       if (_state.currentState) {
         await _changeState({ from: _state.currentState.name, to: "" }, null);
       } else {
-        _end();
+        _setState.end();
       }
 
       resolve();
