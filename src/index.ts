@@ -1,6 +1,7 @@
 import useStateMachineBuilder from "./FSMBuilder";
 import useStateMachineCallback from "./FSMCallback";
 import useStateMachineSetState from "./FSMSetState";
+import useStateMachineControlState from "./FSMControlState";
 import {
   KeyValueType,
   IState,
@@ -33,9 +34,38 @@ export default function _default() {
     sharedVariable: { local: {}, global: {} } as ISharedVariable,
   };
 
+  const _ = {
+    state: _state,
+  };
+
+  const self = {
+    _,
+
+    putStates,
+    putState,
+    putTransitions,
+    putTransition,
+    putSequences,
+    emit,
+    on,
+    onEmitMethods,
+    entry,
+    to,
+    finish,
+
+    updateData,
+    setGlobalData,
+  };
+
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
   const _callback = useStateMachineCallback(_state.handler);
   const _setState = useStateMachineSetState(_state, _callback);
+  const _controlState = useStateMachineControlState(
+    _state,
+    self,
+    _setState,
+    _callback
+  );
 
   function updateData(key: string, value?: any, targetStateName?: string) {
     const c = _state.currentState;
@@ -53,85 +83,6 @@ export default function _default() {
   function setGlobalData(data: any) {
     _state.sharedVariable.global = data || {};
     return self;
-  }
-
-  function entry<T>(stateName: string, argument?: T) {
-    return new Promise(async (resolve, reject) => {
-      _state.headStateName = stateName;
-      _state.isFinished = false;
-      _state.isEnded = false;
-      await _changeState({ from: "", to: stateName }, argument);
-      resolve();
-    });
-  }
-
-  function _changeState(transition: ITransition, argument: any) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        const shared = _state.sharedVariable;
-
-        _setState.exit(transition, self);
-
-        const next = _state.states[transition.to] || null;
-        if (next) {
-          if (transition.to == _state.headStateName) {
-            _callback.executeEvent("head", { eventName: "head" }, shared);
-            if (_state.isFinished) {
-              _setState.end();
-              resolve();
-              return;
-            }
-          }
-
-          _setState.enter(next, argument, transition, self);
-        } else {
-          _setState.end();
-        }
-
-        resolve();
-      }, 0);
-    });
-  }
-
-  function to(stateName: string, argument?: any, current?: IState) {
-    return new Promise(async (resolve, reject) => {
-      if (!_state.currentState) {
-        resolve();
-        return;
-      }
-
-      if (current && current.name != _state.currentState.name) {
-        resolve();
-        return;
-      }
-
-      const ts = _state.transitions[_state.currentState.name];
-      if (!ts) {
-        resolve();
-        return;
-      }
-
-      const index = ts.findIndex((x) => x.to == stateName);
-      if (index != -1) {
-        const t = ts[index];
-        await _changeState(t, argument);
-      }
-
-      resolve();
-    });
-  }
-
-  function finish() {
-    return new Promise(async (resolve, reject) => {
-      _state.isFinished = true;
-      if (_state.currentState) {
-        await _changeState({ from: _state.currentState.name, to: "" }, null);
-      } else {
-        _setState.end();
-      }
-
-      resolve();
-    });
   }
 
   function putStates(x: IState[]): DefaultType {
@@ -170,29 +121,25 @@ export default function _default() {
     _callback.onEmitMethods(methods);
     return self;
   }
-
-  const _ = {
-    state: _state,
-  };
-
-  const self = {
-    _,
-
-    putStates,
-    putState,
-    putTransitions,
-    putTransition,
-    putSequences,
-    emit,
-    on,
-    onEmitMethods,
-
-    updateData,
-    setGlobalData,
-    entry,
-    to,
-    finish,
-  };
+  async function entry(
+    stateName: string,
+    argument?: any
+  ): Promise<DefaultType> {
+    await _controlState.entry(stateName, argument);
+    return self;
+  }
+  async function to(
+    stateName: string,
+    argument?: any,
+    current?: IState
+  ): Promise<DefaultType> {
+    await _controlState.to(stateName, argument, current);
+    return self;
+  }
+  async function finish(): Promise<DefaultType> {
+    await _controlState.finish();
+    return self;
+  }
 
   return self;
 }

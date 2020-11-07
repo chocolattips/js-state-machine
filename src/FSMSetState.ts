@@ -14,6 +14,8 @@ interface IModel {
   sharedVariable: ISharedVariable;
 }
 
+export type FSMSetStateType = ReturnType<typeof _default>;
+
 export default function _default(model: IModel, callback: CallbackType) {
   function enter(
     next: IState,
@@ -41,18 +43,8 @@ export default function _default(model: IModel, callback: CallbackType) {
     model.currentState = null;
   }
 
-  function end() {
-    if (model.isEnded) {
-      return;
-    }
-
-    model.isEnded = true;
-    callback.executeEvent("end", { eventName: "end" }, model.sharedVariable);
-  }
-
   return {
     enter,
     exit,
-    end,
   };
 }

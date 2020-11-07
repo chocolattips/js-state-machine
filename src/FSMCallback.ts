@@ -20,6 +20,8 @@ interface ICallbacks {
   emits: KeyValueType<EventHandlerType>;
 }
 
+export type FSMCallbackType = ReturnType<typeof _default>;
+
 export default function _default(callbacks: ICallbacks) {
   function executeEnter(param: IEnterParam, variable: ISharedVariable) {
     const handler = callbacks.enter;
