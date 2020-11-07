@@ -12,16 +12,21 @@ import {
   UpdateHandlerType,
 } from "./FSMInterface";
 
-export type FSMCallbackType = ReturnType<typeof _default>;
-
-export default function _default() {
-  const _state = {
+export function useDefaultState() {
+  return {
     enter: null as EnterHandlerType | null,
     exit: null as ExitHandlerType | null,
     updates: {} as KeyValueType<UpdateHandlerType>,
     events: {} as KeyValueType<EventHandlerType>,
     emits: {} as KeyValueType<EventHandlerType>,
   };
+}
+type DefaultStateType = ReturnType<typeof useDefaultState>;
+
+export type FSMCallbackType = ReturnType<typeof _default>;
+
+export default function _default(state?: DefaultStateType) {
+  const _state = state || useDefaultState();
 
   function executeEnter(param: IEnterParam, variable: ISharedVariable) {
     const handler = _state.enter;
@@ -105,13 +110,7 @@ export default function _default() {
     }
   }
 
-  const _ = {
-    state: _state,
-  };
-
   const self = {
-    _,
-
     executeEnter,
     executeExit,
     executeUpdate,
