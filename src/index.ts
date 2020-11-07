@@ -1,7 +1,8 @@
 import useStateMachineBuilder from "./FSMBuilder";
 import useStateMachineCallback from "./FSMCallback";
-import useStateMachineSetState from "./FSMSetState";
 import useStateMachineControlState from "./FSMControlState";
+import useStateMachineSetState from "./FSMSetState";
+import useStateMachineVariable from "./FSMVariable";
 import {
   KeyValueType,
   IState,
@@ -55,35 +56,19 @@ export default function _default() {
 
     updateData,
     setGlobalData,
+    clearLocalData,
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
   const _callback = useStateMachineCallback(_state.handler);
-  const _setState = useStateMachineSetState(_state, _callback);
+  const _variable = useStateMachineVariable(_state, self, _callback);
+  const _setState = useStateMachineSetState(_state, _callback, _variable);
   const _controlState = useStateMachineControlState(
     _state,
     self,
     _setState,
     _callback
   );
-
-  function updateData(key: string, value?: any, targetStateName?: string) {
-    const c = _state.currentState;
-    if (c && (!targetStateName || targetStateName == c.name)) {
-      _callback.executeUpdate(
-        { state: c, key, value, context: self },
-        _state.sharedVariable
-      );
-    } else {
-      console.log(`x not update data : ${key}`);
-    }
-    return self;
-  }
-
-  function setGlobalData(data: any) {
-    _state.sharedVariable.global = data || {};
-    return self;
-  }
 
   function putStates(x: IState[]): DefaultType {
     _builder.putStates(x);
@@ -138,6 +123,22 @@ export default function _default() {
   }
   async function finish(): Promise<DefaultType> {
     await _controlState.finish();
+    return self;
+  }
+  function updateData(
+    key: string,
+    value?: any,
+    targetStateName?: string
+  ): DefaultType {
+    _variable.updateData(key, value, targetStateName);
+    return self;
+  }
+  function setGlobalData(data: any) {
+    _variable.setGlobalData(data);
+    return self;
+  }
+  function clearLocalData() {
+    _variable.clearLocalData();
     return self;
   }
 
