@@ -50,6 +50,11 @@ export default function _default() {
     return self;
   }
 
+  function setGlobalData(data: any) {
+    _state.sharedVariable.global = data || {};
+    return self;
+  }
+
   function entry<T>(stateName: string, argument?: T) {
     return new Promise(async (resolve, reject) => {
       _state.headStateName = stateName;
@@ -179,6 +184,7 @@ export default function _default() {
     putSequences,
     on,
     updateData,
+    setGlobalData,
     entry,
     to,
     finish,

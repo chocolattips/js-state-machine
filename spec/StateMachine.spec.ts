@@ -1,4 +1,5 @@
 import useStateMachine from "../src";
+import { IState } from "../src/FSMInterface";
 
 describe("StateMachine", () => {
   function setupSequences(ls?: any[]) {
@@ -13,6 +14,57 @@ describe("StateMachine", () => {
       states: ls,
     };
   }
+
+  describe("updateData", () => {
+    it("", async (done) => {
+      const key = "apple";
+      const value = { price: 300 };
+
+      const o = setupSequences([
+        <IState>{
+          name: "",
+          onUpdateMethods: {
+            apple(param) {
+              try {
+                expect(param.value).toEqual(value);
+              } catch (e) {
+                done(e);
+              }
+
+              done();
+            },
+          },
+        },
+      ]);
+
+      await o.fsm.entry(o.states[0].name);
+      o.fsm.updateData(key, value);
+    });
+  });
+
+  describe("setGlobalData", () => {
+    it("", async (done) => {
+      const globalData = { fruit: { apple: { price: 300 } } };
+
+      const o = setupSequences([
+        <IState>{
+          name: "",
+          onEnter(_, variable) {
+            try {
+              expect(variable.global).toEqual(globalData);
+            } catch (e) {
+              done(e);
+            }
+
+            done();
+          },
+        },
+      ]);
+
+      o.fsm.setGlobalData(globalData);
+      await o.fsm.entry(o.states[0].name);
+    });
+  });
 
   describe("entry", () => {
     it("", async () => {
