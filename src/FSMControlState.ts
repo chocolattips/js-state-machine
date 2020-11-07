@@ -9,10 +9,6 @@ import {
 } from "./FSMInterface";
 
 interface IModel {
-  headStateName: string;
-  isFinished: boolean;
-  isEnded: boolean;
-
   readonly currentState: IState | null;
   readonly states: KeyValueType<IState>;
   readonly transitions: KeyValueType<ITransition[]>;
@@ -20,16 +16,28 @@ interface IModel {
   readonly sharedVariable: ISharedVariable;
 }
 
+export function useDefaultState() {
+  return {
+    headStateName: "",
+    isFinished: false,
+    isEnded: false,
+  };
+}
+type DefaultStateType = ReturnType<typeof useDefaultState>;
+
 export default function (
   model: IModel,
   context: IStateContext,
   setState: FSMSetStateType,
-  callback: FSMCallbackType
+  callback: FSMCallbackType,
+  state?: DefaultStateType
 ) {
+  const _state = state || useDefaultState();
+
   async function entry(stateName: string, argument?: any) {
-    model.headStateName = stateName;
-    model.isFinished = false;
-    model.isEnded = false;
+    _state.headStateName = stateName;
+    _state.isFinished = false;
+    _state.isEnded = false;
     await changeState({ from: "", to: stateName }, argument);
   }
 
@@ -42,9 +50,9 @@ export default function (
 
         const next = model.states[transition.to] || null;
         if (next) {
-          if (transition.to == model.headStateName) {
+          if (transition.to == _state.headStateName) {
             callback.executeEvent("head", { eventName: "head" }, shared);
-            if (model.isFinished) {
+            if (_state.isFinished) {
               end();
               resolve();
               return;
@@ -83,7 +91,7 @@ export default function (
   }
 
   async function finish() {
-    model.isFinished = true;
+    _state.isFinished = true;
     if (model.currentState) {
       await changeState({ from: model.currentState.name, to: "" }, null);
     } else {
@@ -92,11 +100,11 @@ export default function (
   }
 
   function end() {
-    if (model.isEnded) {
+    if (_state.isEnded) {
       return;
     }
 
-    model.isEnded = true;
+    _state.isEnded = true;
     callback.executeEvent("end", { eventName: "end" }, model.sharedVariable);
   }
 

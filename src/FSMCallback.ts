@@ -12,19 +12,19 @@ import {
   UpdateHandlerType,
 } from "./FSMInterface";
 
-interface ICallbacks {
-  enter: EnterHandlerType | null;
-  exit: ExitHandlerType | null;
-  updates: KeyValueType<UpdateHandlerType>;
-  events: KeyValueType<EventHandlerType>;
-  emits: KeyValueType<EventHandlerType>;
-}
-
 export type FSMCallbackType = ReturnType<typeof _default>;
 
-export default function _default(callbacks: ICallbacks) {
+export default function _default() {
+  const _state = {
+    enter: null as EnterHandlerType | null,
+    exit: null as ExitHandlerType | null,
+    updates: {} as KeyValueType<UpdateHandlerType>,
+    events: {} as KeyValueType<EventHandlerType>,
+    emits: {} as KeyValueType<EventHandlerType>,
+  };
+
   function executeEnter(param: IEnterParam, variable: ISharedVariable) {
-    const handler = callbacks.enter;
+    const handler = _state.enter;
     if (handler) {
       handler(param, variable);
     }
@@ -36,7 +36,7 @@ export default function _default(callbacks: ICallbacks) {
   }
 
   function executeExit(param: IExitParam, variable: ISharedVariable) {
-    const handler = callbacks.exit;
+    const handler = _state.exit;
     if (handler) {
       handler(param, variable);
     }
@@ -48,7 +48,7 @@ export default function _default(callbacks: ICallbacks) {
   }
 
   function executeUpdate(param: IUpdateParam, variable: ISharedVariable) {
-    const handler = callbacks.updates["update"];
+    const handler = _state.updates["update"];
     if (handler) {
       handler(param, variable);
     }
@@ -70,7 +70,7 @@ export default function _default(callbacks: ICallbacks) {
     param: IEventParam,
     variable: ISharedVariable
   ) {
-    const handler = callbacks.events[eventName];
+    const handler = _state.events[eventName];
     if (handler) {
       handler(param, variable);
     }
@@ -78,7 +78,7 @@ export default function _default(callbacks: ICallbacks) {
 
   function executeEmit(param: IEventParam, variable: ISharedVariable) {
     executeEvent("emit", param, variable);
-    const handler = callbacks.emits[param.eventName];
+    const handler = _state.emits[param.eventName];
     if (handler) {
       handler(param, variable);
     }
@@ -89,23 +89,29 @@ export default function _default(callbacks: ICallbacks) {
     handler: EventHandlerNameMap[K]
   ) {
     if (eventName == "enter") {
-      callbacks.enter = handler as EnterHandlerType;
+      _state.enter = handler as EnterHandlerType;
     } else if (eventName == "exit") {
-      callbacks.exit = handler as ExitHandlerType;
+      _state.exit = handler as ExitHandlerType;
     } else if (eventName == "update") {
-      callbacks.updates[eventName] = handler as UpdateHandlerType;
+      _state.updates[eventName] = handler as UpdateHandlerType;
     } else {
-      callbacks.events[eventName] = handler as EventHandlerType;
+      _state.events[eventName] = handler as EventHandlerType;
     }
   }
 
   function onEmitMethods(methods: { [key: string]: EventHandlerType }) {
     for (const key in methods) {
-      callbacks.emits[key] = methods[key];
+      _state.emits[key] = methods[key];
     }
   }
 
+  const _ = {
+    state: _state,
+  };
+
   const self = {
+    _,
+
     executeEnter,
     executeExit,
     executeUpdate,

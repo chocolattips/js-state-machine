@@ -1,10 +1,10 @@
-import useStateMachine from "../src";
+import useStateMachine, { useDefaultState } from "../src";
 import { IState } from "../src/FSMInterface";
 
 describe("StateMachine", () => {
   function setupSequences(ls?: any[]) {
-    const fsm = useStateMachine();
-    const fsmState = fsm._.state;
+    const fsmState = useDefaultState();
+    const fsm = useStateMachine(fsmState);
     ls = ls || [{ name: "hello" }, { name: "world" }];
     fsm.putSequences(ls);
 
@@ -117,21 +117,6 @@ describe("StateMachine", () => {
       });
 
       await o.fsm.to(o.states[1].name, argument);
-    });
-  });
-
-  describe("finish", () => {
-    it("", async (done) => {
-      const o = setupSequences();
-      await o.fsm.entry(o.states[0].name);
-
-      o.fsm.on("end", () => {
-        done();
-      });
-
-      expect(o.fsm._.state.isEnded).toBeFalsy();
-      await o.fsm.finish();
-      expect(o.fsm._.state.isEnded).toBeTruthy();
     });
   });
 

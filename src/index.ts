@@ -7,9 +7,6 @@ import {
   KeyValueType,
   IState,
   ITransition,
-  EnterHandlerType,
-  ExitHandlerType,
-  UpdateHandlerType,
   EventHandlerType,
   ISharedVariable,
   EventHandlerNameMap,
@@ -17,31 +14,20 @@ import {
 
 type DefaultType = ReturnType<typeof _default>;
 
-export default function _default() {
-  const _state = {
-    headStateName: "",
-    isFinished: false,
-    isEnded: false,
+export function useDefaultState() {
+  return {
     currentState: null as IState | null,
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
-    handler: {
-      enter: null as EnterHandlerType | null,
-      exit: null as ExitHandlerType | null,
-      updates: {} as KeyValueType<UpdateHandlerType>,
-      events: {} as KeyValueType<EventHandlerType>,
-      emits: {} as KeyValueType<EventHandlerType>,
-    },
     sharedVariable: { local: {}, global: {} } as ISharedVariable,
   };
+}
+type DefaultStateType = ReturnType<typeof useDefaultState>;
 
-  const _ = {
-    state: _state,
-  };
+export default function _default(state?: DefaultStateType) {
+  const _state = state || useDefaultState();
 
   const self = {
-    _,
-
     putStates,
     putState,
     putTransitions,
@@ -60,7 +46,7 @@ export default function _default() {
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
-  const _callback = useStateMachineCallback(_state.handler);
+  const _callback = useStateMachineCallback();
   const _variable = useStateMachineVariable(_state, self, _callback);
   const _setState = useStateMachineSetState(_state, _callback, _variable);
   const _controlState = useStateMachineControlState(
