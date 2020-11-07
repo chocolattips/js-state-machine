@@ -13,11 +13,11 @@ interface IModel {
   isFinished: boolean;
   isEnded: boolean;
 
-  currentState: IState | null;
-  states: KeyValueType<IState>;
-  transitions: KeyValueType<ITransition[]>;
+  readonly currentState: IState | null;
+  readonly states: KeyValueType<IState>;
+  readonly transitions: KeyValueType<ITransition[]>;
 
-  sharedVariable: ISharedVariable;
+  readonly sharedVariable: ISharedVariable;
 }
 
 export default function (

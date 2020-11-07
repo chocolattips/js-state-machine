@@ -10,7 +10,6 @@ type CallbackType = ReturnType<typeof useFSMCallback>;
 
 interface IModel {
   currentState: IState | null;
-  isEnded: boolean;
   sharedVariable: ISharedVariable;
 }
 
