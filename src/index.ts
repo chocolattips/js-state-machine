@@ -177,19 +177,21 @@ export default function _default() {
 
   const self = {
     _,
+
     putStates,
     putState,
     putTransitions,
     putTransition,
     putSequences,
+    emit,
     on,
+    onEmitMethods,
+
     updateData,
     setGlobalData,
     entry,
     to,
     finish,
-    emit,
-    onEmitMethods,
   };
 
   return self;
