@@ -19,6 +19,12 @@ export interface IStateContext {
   emit: (eventName: string, data?: any) => void;
 }
 
+export interface IFSMContext {
+  to: (stateName: string, param?: any, current?: IState) => void;
+  finish: () => void;
+  updateData: (key: string, value?: any, targetStateName?: string) => void;
+}
+
 export interface IEnterParam {
   context: IStateContext;
   state: IState;
@@ -42,6 +48,11 @@ export interface IUpdateParam {
 export interface IEventParam {
   eventName: string;
   data?: any;
+}
+
+export interface IEmitParam extends IEventParam {
+  context: IFSMContext;
+  state: IState;
 }
 
 export interface ISharedVariable {
@@ -69,11 +80,16 @@ export type EventHandlerType = (
   variable: ISharedVariable
 ) => void;
 
+export type EmitHandlerType = (
+  param: IEmitParam,
+  variable: ISharedVariable
+) => void;
+
 export interface EventHandlerNameMap {
   head: EventHandlerType;
   enter: EnterHandlerType;
   update: UpdateHandlerType;
-  emit: EventHandlerType;
+  emit: EmitHandlerType;
   exit: ExitHandlerType;
   end: EventHandlerType;
 }

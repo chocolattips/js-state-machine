@@ -10,15 +10,18 @@ import {
   IUpdateParam,
   KeyValueType,
   UpdateHandlerType,
+  EmitHandlerType,
+  IEmitParam,
 } from "./FSMInterface";
 
 export function useDefaultState() {
   return {
     enter: null as EnterHandlerType | null,
     exit: null as ExitHandlerType | null,
+    emit: null as EmitHandlerType | null,
     updates: {} as KeyValueType<UpdateHandlerType>,
     events: {} as KeyValueType<EventHandlerType>,
-    emits: {} as KeyValueType<EventHandlerType>,
+    emits: {} as KeyValueType<EmitHandlerType>,
   };
 }
 type DefaultStateType = ReturnType<typeof useDefaultState>;
@@ -81,8 +84,11 @@ export default function _default(state?: DefaultStateType) {
     }
   }
 
-  function executeEmit(param: IEventParam, variable: ISharedVariable) {
-    executeEvent("emit", param, variable);
+  function executeEmit(param: IEmitParam, variable: ISharedVariable) {
+    if (_state.emit) {
+      _state.emit(param, variable);
+    }
+
     const handler = _state.emits[param.eventName];
     if (handler) {
       handler(param, variable);
@@ -99,12 +105,14 @@ export default function _default(state?: DefaultStateType) {
       _state.exit = handler as ExitHandlerType;
     } else if (eventName == "update") {
       _state.updates[eventName] = handler as UpdateHandlerType;
+    } else if (eventName == "emit") {
+      _state.emit = handler as EmitHandlerType;
     } else {
       _state.events[eventName] = handler as EventHandlerType;
     }
   }
 
-  function onEmitMethods(methods: { [key: string]: EventHandlerType }) {
+  function onEmitMethods(methods: { [key: string]: EmitHandlerType }) {
     for (const key in methods) {
       _state.emits[key] = methods[key];
     }

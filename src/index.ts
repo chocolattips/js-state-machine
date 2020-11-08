@@ -10,6 +10,7 @@ import {
   EventHandlerType,
   ISharedVariable,
   EventHandlerNameMap,
+  EmitHandlerType,
 } from "./FSMInterface";
 
 type DefaultType = ReturnType<typeof _default>;
@@ -77,7 +78,12 @@ export default function _default(state?: DefaultStateType) {
     return self;
   }
   function emit(eventName: string, data?: any) {
-    _callback.executeEmit({ eventName, data }, _state.sharedVariable);
+    if (_state.currentState) {
+      _callback.executeEmit(
+        { eventName, data, context: self, state: _state.currentState },
+        _state.sharedVariable
+      );
+    }
   }
   function on<K extends keyof EventHandlerNameMap>(
     eventName: K,
@@ -87,7 +93,7 @@ export default function _default(state?: DefaultStateType) {
     return self;
   }
   function onEmitMethods(methods: {
-    [key: string]: EventHandlerType;
+    [key: string]: EmitHandlerType;
   }): DefaultType {
     _callback.onEmitMethods(methods);
     return self;
