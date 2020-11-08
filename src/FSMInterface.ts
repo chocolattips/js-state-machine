@@ -3,8 +3,10 @@ export type KeyValueType<T> = { [key: string]: T };
 export interface IState {
   name: string;
   onEnter?(param: IEnterParam, variable: ISharedVariable): void;
-  onUpdate?: UpdateHandlerType;
-  onUpdateMethods?: { [key: string]: UpdateHandlerType };
+  onUpdate?(param: IUpdateParam, variable: ISharedVariable): void;
+  onUpdateMethods?: {
+    [key: string]: (param: IUpdateParam, variable: ISharedVariable) => void;
+  };
   onExit?(param: IExitParam, variable: ISharedVariable): void;
 }
 
@@ -25,24 +27,45 @@ export interface IFSMContext {
   updateData: (key: string, value?: any, targetStateName?: string) => void;
 }
 
-export interface IEnterParam {
-  context: IStateContext;
+export interface IEnterParamBase {
   state: IState;
   transition: ITransition;
   argument?: any;
 }
 
-export interface IExitParam {
+export interface IEnterParam extends IEnterParamBase {
   context: IStateContext;
+}
+
+export interface IFSMEnterParam extends IEnterParamBase {
+  context: IFSMContext;
+}
+
+export interface IExitParamBase {
   state: IState;
   transition: ITransition;
 }
 
-export interface IUpdateParam {
+export interface IExitParam extends IExitParamBase {
   context: IStateContext;
+}
+
+export interface IFSMExitParam extends IExitParamBase {
+  context: IFSMContext;
+}
+
+export interface IUpdateParamBase {
   state: IState;
   key: string;
   value?: any;
+}
+
+export interface IUpdateParam extends IUpdateParamBase {
+  context: IStateContext;
+}
+
+export interface IFSMUpdateParam extends IUpdateParamBase {
+  context: IFSMContext;
 }
 
 export interface IEventParam {
@@ -50,9 +73,13 @@ export interface IEventParam {
   data?: any;
 }
 
-export interface IEmitParam extends IEventParam {
+export interface IFSMEmitParam extends IEventParam {
   context: IFSMContext;
   state: IState;
+}
+
+export interface IFSMEventParam extends IEventParam {
+  context: IFSMContext;
 }
 
 export interface ISharedVariable {
@@ -61,27 +88,27 @@ export interface ISharedVariable {
 }
 
 export type EnterHandlerType = (
-  param: IEnterParam,
+  param: IFSMEnterParam,
   variable: ISharedVariable
 ) => void;
 
 export type ExitHandlerType = (
-  param: IEnterParam,
+  param: IFSMExitParam,
   variable: ISharedVariable
 ) => void;
 
 export type UpdateHandlerType = (
-  param: IUpdateParam,
+  param: IFSMUpdateParam,
   variable: ISharedVariable
 ) => void;
 
 export type EventHandlerType = (
-  param: IEventParam,
+  param: IFSMEventParam,
   variable: ISharedVariable
 ) => void;
 
 export type EmitHandlerType = (
-  param: IEmitParam,
+  param: IFSMEmitParam,
   variable: ISharedVariable
 ) => void;
 

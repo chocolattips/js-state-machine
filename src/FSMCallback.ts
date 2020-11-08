@@ -11,7 +11,8 @@ import {
   KeyValueType,
   UpdateHandlerType,
   EmitHandlerType,
-  IEmitParam,
+  IFSMEmitParam,
+  IFSMContext,
 } from "./FSMInterface";
 
 export function useDefaultState() {
@@ -28,13 +29,16 @@ type DefaultStateType = ReturnType<typeof useDefaultState>;
 
 export type FSMCallbackType = ReturnType<typeof _default>;
 
-export default function _default(state?: DefaultStateType) {
+export default function _default(
+  context: IFSMContext,
+  state?: DefaultStateType
+) {
   const _state = state || useDefaultState();
 
   function executeEnter(param: IEnterParam, variable: ISharedVariable) {
     const handler = _state.enter;
     if (handler) {
-      handler(param, variable);
+      handler({ ...param, context }, variable);
     }
 
     const c = param.state;
@@ -46,7 +50,7 @@ export default function _default(state?: DefaultStateType) {
   function executeExit(param: IExitParam, variable: ISharedVariable) {
     const handler = _state.exit;
     if (handler) {
-      handler(param, variable);
+      handler({ ...param, context }, variable);
     }
 
     const c = param.state;
@@ -58,7 +62,7 @@ export default function _default(state?: DefaultStateType) {
   function executeUpdate(param: IUpdateParam, variable: ISharedVariable) {
     const handler = _state.updates["update"];
     if (handler) {
-      handler(param, variable);
+      handler({ ...param, context }, variable);
     }
 
     const c = param.state;
@@ -80,11 +84,11 @@ export default function _default(state?: DefaultStateType) {
   ) {
     const handler = _state.events[eventName];
     if (handler) {
-      handler(param, variable);
+      handler({ ...param, context }, variable);
     }
   }
 
-  function executeEmit(param: IEmitParam, variable: ISharedVariable) {
+  function executeEmit(param: IFSMEmitParam, variable: ISharedVariable) {
     if (_state.emit) {
       _state.emit(param, variable);
     }

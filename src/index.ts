@@ -47,7 +47,7 @@ export default function _default(state?: DefaultStateType) {
   };
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
-  const _callback = useStateMachineCallback();
+  const _callback = useStateMachineCallback(self);
   const _variable = useStateMachineVariable(_state, self, _callback);
   const _setState = useStateMachineSetState(_state, _callback, _variable);
   const _controlState = useStateMachineControlState(
