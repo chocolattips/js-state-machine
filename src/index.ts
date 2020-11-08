@@ -119,11 +119,11 @@ export default function _default(state?: DefaultStateType) {
     _variable.updateData(key, value, targetStateName);
     return self;
   }
-  function setGlobalData(data: any) {
+  function setGlobalData(data: any): DefaultType {
     _variable.setGlobalData(data);
     return self;
   }
-  function clearLocalData() {
+  function clearLocalData(): DefaultType {
     _variable.clearLocalData();
     return self;
   }
