@@ -7,7 +7,6 @@ import {
   KeyValueType,
   IState,
   ITransition,
-  EventHandlerType,
   ISharedVariable,
   EventHandlerNameMap,
   EmitHandlerType,

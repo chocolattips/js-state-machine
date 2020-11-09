@@ -1,11 +1,11 @@
+import { FSMCallbackType } from "./FSMCallback";
+import { FSMVariableType } from "./FSMVariable";
 import {
   IState,
   ITransition,
   ISharedVariable,
   IStateContext,
 } from "./FSMInterface";
-import { FSMCallbackType } from "./FSMCallback";
-import { FSMVariableType } from "./FSMVariable";
 
 interface IModel {
   currentState: IState | null;
