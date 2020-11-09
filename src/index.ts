@@ -72,8 +72,8 @@ export default function _default(state?: DefaultStateType) {
     _builder.putTransition(x);
     return self;
   }
-  function putSequences(x: IState[]): DefaultType {
-    _builder.putSequences(x);
+  function putSequences(x: IState[], loop: boolean = false): DefaultType {
+    _builder.putSequences(x, loop);
     return self;
   }
   function emit(eventName: string, data?: any) {
