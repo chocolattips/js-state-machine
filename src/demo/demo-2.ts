@@ -1,7 +1,7 @@
 import useFSM from "..";
 
-function useVegetableFSM(onComplete: Function, numIndent: number) {
-  const indent = " ".repeat(numIndent);
+function useVegetableFSM(numSpaces: number) {
+  const spaces = " ".repeat(numSpaces);
   return useFSM()
     .putSequences([
       {
@@ -24,25 +24,23 @@ function useVegetableFSM(onComplete: Function, numIndent: number) {
       },
     ])
     .on("enter", (param) => {
-      console.log(`${indent}[ENTER] : ${param.state.name}`);
+      console.log(`${spaces}[ENTER] : ${param.state.name}`);
     })
     .on("exit", (param) => {
-      console.log(`${indent}[EXIT] : ${param.state.name}`);
-    })
-    .on("end", () => onComplete())
-    .entry("avocado");
+      console.log(`${spaces}[EXIT] : ${param.state.name}`);
+    });
 }
 
-function useFruitFSM(onComplete: Function, numIndent: number) {
-  const indent = " ".repeat(numIndent);
+function useFruitFSM(numSpaces: number) {
+  const spaces = " ".repeat(numSpaces);
   return useFSM()
     .putSequences([
       {
         name: "apple",
         onEnter(param) {
-          useAppleFSM(() => {
-            param.context.to("banana");
-          }, numIndent + 2);
+          useAppleFSM(numSpaces + 2)
+            .on("end", () => param.context.to("banana"))
+            .entry("red");
         },
       },
       {
@@ -59,17 +57,15 @@ function useFruitFSM(onComplete: Function, numIndent: number) {
       },
     ])
     .on("enter", (param) => {
-      console.log(`${indent}[ENTER] : ${param.state.name}`);
+      console.log(`${spaces}[ENTER] : ${param.state.name}`);
     })
     .on("exit", (param) => {
-      console.log(`${indent}[EXIT] : ${param.state.name}`);
-    })
-    .on("end", () => onComplete())
-    .entry("apple");
+      console.log(`${spaces}[EXIT] : ${param.state.name}`);
+    });
 }
 
-function useAppleFSM(onComplete: Function, numIndent: number) {
-  const indent = " ".repeat(numIndent);
+function useAppleFSM(numSpaces: number) {
+  const spaces = " ".repeat(numSpaces);
   return useFSM()
     .putSequences([
       {
@@ -86,13 +82,11 @@ function useAppleFSM(onComplete: Function, numIndent: number) {
       },
     ])
     .on("enter", (param) => {
-      console.log(`${indent}[ENTER] : ${param.state.name}`);
+      console.log(`${spaces}[ENTER] : ${param.state.name}`);
     })
     .on("exit", (param) => {
-      console.log(`${indent}[EXIT] : ${param.state.name}`);
-    })
-    .on("end", () => onComplete())
-    .entry("red");
+      console.log(`${spaces}[EXIT] : ${param.state.name}`);
+    });
 }
 
 useFSM()
@@ -100,17 +94,17 @@ useFSM()
     {
       name: "fruit",
       onEnter(param) {
-        useFruitFSM(() => {
-          param.context.to("vegetable");
-        }, 2);
+        useFruitFSM(2)
+          .on("end", () => param.context.to("vegetable"))
+          .entry("apple");
       },
     },
     {
       name: "vegetable",
       onEnter(param) {
-        useVegetableFSM(() => {
-          param.context.finish();
-        }, 2);
+        useVegetableFSM(2)
+          .on("end", () => param.context.finish())
+          .entry("avocado");
       },
     },
   ])
