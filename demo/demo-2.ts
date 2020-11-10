@@ -1,4 +1,4 @@
-import useFSM from "..";
+import useFSM from "../src";
 
 function useVegetableFSM(numSpaces: number) {
   const spaces = " ".repeat(numSpaces);

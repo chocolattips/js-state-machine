@@ -1,11 +1,11 @@
-import useFSM from "..";
-import { IState } from "../FSMInterface";
+import useFSM from "../src";
+import { IState } from "../src/FSMInterface";
 
 function useStateApple() {
   return <IState>{
     name: "apple",
     onEnter(param) {
-      param.context.emit("next", { name: "banana" });
+      param.context.to("banana");
     },
   };
 }
@@ -14,7 +14,7 @@ function useStateBanana() {
   return <IState>{
     name: "banana",
     onEnter(param) {
-      param.context.emit("next", { name: "cherry" });
+      param.context.to("cherry");
     },
   };
 }
@@ -23,23 +23,19 @@ function useStateCherry() {
   return <IState>{
     name: "cherry",
     onEnter(param) {
-      param.context.emit("finish");
+      param.context.finish();
     },
   };
 }
 
 useFSM()
-  .putSequences([useStateApple(), useStateBanana(), useStateCherry()])
+  .putStates([useStateApple(), useStateBanana(), useStateCherry()])
+  .putTransitions([
+    { from: "apple", to: "banana" },
+    { from: "banana", to: "cherry" },
+  ])
   .on("enter", (param) => {
     console.log(`[ENTER] : ${param.state.name}`);
-  })
-  .onEmitMethods({
-    next(param) {
-      param.context.to(param.data.name);
-    },
-    finish(param) {
-      param.context.finish();
-    },
   })
   .on("exit", (param) => {
     console.log(`[EXIT] : ${param.state.name}`);

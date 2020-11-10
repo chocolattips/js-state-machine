@@ -1,4 +1,4 @@
-import useFSM from "..";
+import useFSM from "../src";
 
 useFSM()
   .putSequences([
