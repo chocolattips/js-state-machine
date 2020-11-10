@@ -1,19 +1,20 @@
 {
   "name": "state-machine",
-  "version": "1.0.0",
+  "version": "0.3.0",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
     "start": "node ./dist/index.js",
     "build": "webpack --config webpack.config.js",
-    "package": "npm pack && tar -xvf state-machine*.tgz",
+    "package": "npm run build && npm pack && tar -xvf state-machine-0.3.0.tgz",
+    "demo": "ts-node",
     "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "",
   "files": [
-    "dist"
+    "dist/*.ts"
   ],
   "dependencies": {},
   "devDependencies": {
@@ -21,6 +22,7 @@
     "jest": "^25.5.4",
     "ts-jest": "^25.5.1",
     "ts-loader": "^8.0.4",
+    "ts-node": "^9.0.0",
     "typescript": "^3.9.7",
     "webpack": "^5.0.0",
     "webpack-cli": "^4.0.0"
