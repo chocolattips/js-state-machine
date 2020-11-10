@@ -1,7 +1,12 @@
 import useFSMSetState from "../src/FSMSetState";
 import useFSMCallback from "../src/FSMCallback";
 import useFSMVariable from "../src/FSMVariable";
-import { IState, IStateContext, ITransition } from "../src/FSMInterface";
+import {
+  IFSMContext,
+  IState,
+  IStateContext,
+  ITransition,
+} from "../src/FSMInterface";
 
 describe("FSMSetState", () => {
   function setup() {
@@ -13,8 +18,9 @@ describe("FSMSetState", () => {
       },
     };
 
+    const fsmContext = {} as IFSMContext;
     const context = {} as IStateContext;
-    const callback = useFSMCallback();
+    const callback = useFSMCallback(fsmContext);
     const variable = useFSMVariable(model, context, callback);
     const setState = useFSMSetState(model, callback, variable);
 

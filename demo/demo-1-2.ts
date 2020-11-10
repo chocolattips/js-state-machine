@@ -1,5 +1,5 @@
-import useFSM from "..";
-import { IState } from "../FSMInterface";
+import useFSM from "../src";
+import { IState } from "../src/FSMInterface";
 
 function useStateApple() {
   return <IState>{
@@ -29,11 +29,7 @@ function useStateCherry() {
 }
 
 useFSM()
-  .putStates([useStateApple(), useStateBanana(), useStateCherry()])
-  .putTransitions([
-    { from: "apple", to: "banana" },
-    { from: "banana", to: "cherry" },
-  ])
+  .putSequences([useStateApple(), useStateBanana(), useStateCherry()])
   .on("enter", (param) => {
     console.log(`[ENTER] : ${param.state.name}`);
   })
