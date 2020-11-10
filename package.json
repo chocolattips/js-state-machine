@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node ./dist/index.js",
     "build": "webpack --config webpack.config.js",
-    "package": "npm pack && tar -xvf state-machine*.tgz",
+    "package": "npm run build && npm pack && tar -xvf state-machine-0.3.0.tgz",
     "demo": "ts-node",
     "test": "jest"
   },
@@ -14,7 +14,7 @@
   "author": "",
   "license": "",
   "files": [
-    "dist"
+    "dist/*.ts"
   ],
   "dependencies": {},
   "devDependencies": {
