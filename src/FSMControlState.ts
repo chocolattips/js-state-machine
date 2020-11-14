@@ -35,10 +35,20 @@ export default function (
   const _state = state || useDefaultState();
 
   async function entry(stateName: string, argument?: any) {
-    _state.headStateName = stateName;
+    if (!_state.headStateName) {
+      setHead(stateName);
+    }
     _state.isFinished = false;
     _state.isEnded = false;
     await changeState({ from: "", to: stateName }, argument);
+  }
+
+  function setHead(stateName: string) {
+    _state.headStateName = stateName;
+  }
+
+  function isHead(stateName: string) {
+    return stateName && _state.headStateName == stateName;
   }
 
   function changeState(transition: ITransition, argument: any) {
@@ -118,6 +128,8 @@ export default function (
 
   return {
     entry,
+    setHead,
+    isHead,
     changeState,
     to,
     findTransition,

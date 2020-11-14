@@ -36,7 +36,10 @@ export default function _default(state?: DefaultStateType) {
     emit,
     on,
     onEmitMethods,
+
     entry,
+    setHead,
+    isHead,
     to,
     can,
     finish,
@@ -104,6 +107,13 @@ export default function _default(state?: DefaultStateType) {
   ): Promise<DefaultType> {
     await _controlState.entry(stateName, argument);
     return self;
+  }
+  function setHead(stateName: string): DefaultType {
+    _controlState.setHead(stateName);
+    return self;
+  }
+  function isHead(stateName: string) {
+    return _controlState.isHead(stateName);
   }
   async function to(
     stateName: string,
