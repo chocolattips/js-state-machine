@@ -17,12 +17,14 @@ export interface ITransition {
 
 export interface IStateContext {
   to: (stateName: string, param?: any, current?: IState) => void;
+  can: (stateName: string, current?: IState) => boolean;
   finish: () => void;
   emit: (eventName: string, data?: any) => void;
 }
 
 export interface IFSMContext {
   to: (stateName: string, param?: any, current?: IState) => void;
+  can: (stateName: string, current?: IState) => boolean;
   finish: () => void;
   updateData: (key: string, value?: any, targetStateName?: string) => void;
 }

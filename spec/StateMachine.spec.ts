@@ -120,6 +120,16 @@ describe("StateMachine", () => {
     });
   });
 
+  describe("can", () => {
+    it("", async () => {
+      const o = setupSequences();
+      await o.fsm.entry(o.states[0].name);
+
+      expect(o.fsm.can(o.states[1].name)).toBeTruthy();
+      expect(o.fsm.can("xxxx")).toBeFalsy();
+    });
+  });
+
   describe("emit", () => {
     function setup() {
       const eventName = "helloworld";

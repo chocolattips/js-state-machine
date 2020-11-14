@@ -70,24 +70,32 @@ export default function (
   }
 
   async function to(stateName: string, argument?: any, current?: IState) {
+    const t = findTransition(stateName, current);
+    if (null != t) {
+      await changeState(t, argument);
+    }
+  }
+
+  function findTransition(stateName: string, current?: IState) {
     if (!model.currentState) {
-      return;
+      return null;
     }
 
     if (current && current.name != model.currentState.name) {
-      return;
+      return null;
     }
 
     const ts = model.transitions[model.currentState.name];
     if (!ts) {
-      return;
+      return null;
     }
 
     const index = ts.findIndex((x) => x.to == stateName);
-    if (index != -1) {
-      const t = ts[index];
-      await changeState(t, argument);
+    if (index == -1) {
+      return null;
     }
+
+    return ts[index];
   }
 
   async function finish() {
@@ -112,6 +120,7 @@ export default function (
     entry,
     changeState,
     to,
+    findTransition,
     finish,
     end,
   };

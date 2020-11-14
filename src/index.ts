@@ -38,6 +38,7 @@ export default function _default(state?: DefaultStateType) {
     onEmitMethods,
     entry,
     to,
+    can,
     finish,
 
     updateData,
@@ -111,6 +112,9 @@ export default function _default(state?: DefaultStateType) {
   ): Promise<DefaultType> {
     await _controlState.to(stateName, argument, current);
     return self;
+  }
+  function can(stateName: string, current?: IState) {
+    return _controlState.findTransition(stateName, current) != null;
   }
   async function finish(): Promise<DefaultType> {
     await _controlState.finish();
