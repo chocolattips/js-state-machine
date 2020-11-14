@@ -92,6 +92,18 @@ describe("StateMachine", () => {
     });
   });
 
+  describe("head", () => {
+    it("", async () => {
+      const o = setupSequences();
+      const headName = o.states[0].name;
+      await o.fsm.entry(headName);
+
+      expect(o.fsm.isHead(headName)).toBeTruthy();
+      o.fsm.setHead(o.states[1].name);
+      expect(o.fsm.isHead(headName)).toBeFalsy();
+    });
+  });
+
   describe("to", () => {
     it("", async () => {
       const o = setupSequences();
