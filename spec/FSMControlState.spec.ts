@@ -23,7 +23,7 @@ describe("FSMControlState", () => {
       _context,
       _setState,
       _callback,
-      model
+      _variable
     );
 
     ls = ls || [{ name: "a" }];

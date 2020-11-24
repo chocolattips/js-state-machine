@@ -1,8 +1,8 @@
 import { FSMCallbackType } from "./FSMCallback";
 import { FSMSetStateType } from "./FSMSetState";
+import { FSMVariableType } from "./FSMVariable";
 import {
   ITransition,
-  ISharedVariable,
   IState,
   IStateContext,
   KeyValueType,
@@ -12,8 +12,6 @@ interface IModel {
   readonly currentState: IState | null;
   readonly states: KeyValueType<IState>;
   readonly transitions: KeyValueType<ITransition[]>;
-
-  readonly sharedVariable: ISharedVariable;
 }
 
 export function useDefaultState() {
@@ -30,6 +28,7 @@ export default function (
   context: IStateContext,
   setState: FSMSetStateType,
   callback: FSMCallbackType,
+  variable: FSMVariableType,
   state?: DefaultStateType
 ) {
   const _state = state || useDefaultState();
@@ -54,13 +53,12 @@ export default function (
   function changeState(transition: ITransition, argument: any) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const shared = model.sharedVariable;
-
         setState.exit(transition, context);
 
         const next = model.states[transition.to] || null;
         if (next) {
           if (transition.to == _state.headStateName) {
+            const shared = variable.getVariable(next.name);
             callback.executeEvent("head", { eventName: "head" }, shared);
             if (_state.isFinished) {
               end();
@@ -123,7 +121,11 @@ export default function (
     }
 
     _state.isEnded = true;
-    callback.executeEvent("end", { eventName: "end" }, model.sharedVariable);
+    callback.executeEvent(
+      "end",
+      { eventName: "end" },
+      variable.getVariable("")
+    );
   }
 
   return {

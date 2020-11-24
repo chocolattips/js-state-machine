@@ -130,6 +130,43 @@ describe("StateMachine", () => {
 
       await o.fsm.to(o.states[1].name, argument);
     });
+
+    it("variable", async (done) => {
+      const texts = {
+        local: "LOCAL",
+        state: "STATE",
+        global: "GLOBAL",
+      };
+      const states = [
+        <IState>{
+          name: "hello",
+          onEnter(param, variable) {
+            if (variable.global.text) {
+              expect(variable.local.text).toBeUndefined();
+              expect(variable.state.text).toEqual(texts.state);
+              expect(variable.global.text).toEqual(texts.global);
+              done();
+            } else {
+              variable.local.text = texts.local;
+              variable.state.text = texts.state;
+              variable.global.text = texts.global;
+              param.context.to("world");
+            }
+          },
+        },
+        <IState>{
+          name: "world",
+          onEnter(param, variable) {
+            expect(variable.local.text).toBeUndefined();
+            expect(variable.state.text).toBeUndefined();
+            expect(variable.global.text).toEqual(texts.global);
+            param.context.to("hello");
+          },
+        },
+      ];
+      const fsm = useStateMachine().putSequences(states, true);
+      await fsm.entry(states[0].name);
+    });
   });
 
   describe("can", () => {
