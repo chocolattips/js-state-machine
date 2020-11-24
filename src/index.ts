@@ -21,7 +21,7 @@ export function useDefaultState() {
     transitions: {} as KeyValueType<ITransition[]>,
     sharedVariable: {
       locals: {},
-      states: {},
+      internals: {},
       global: {},
     } as ISharedVariableStore,
   };

@@ -15,7 +15,7 @@ describe("FSMSetState", () => {
       currentState: null as IState | null,
       sharedVariable: {
         locals: {},
-        states: {},
+        internals: {},
         global: {},
       } as ISharedVariableStore,
     };

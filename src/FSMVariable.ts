@@ -50,13 +50,13 @@ export default function _default(
     if (!s.locals[stateName]) {
       s.locals[stateName] = {};
     }
-    if (!s.states[stateName]) {
-      s.states[stateName] = {};
+    if (!s.internals[stateName]) {
+      s.internals[stateName] = {};
     }
 
     return <ISharedVariable>{
       local: s.locals[stateName],
-      state: s.states[stateName],
+      state: s.internals[stateName],
       global: s.global,
     };
   }

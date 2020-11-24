@@ -92,7 +92,7 @@ export interface ISharedVariable {
 
 export interface ISharedVariableStore {
   locals: KeyValueType<KeyValueType<any>>;
-  states: KeyValueType<KeyValueType<any>>;
+  internals: KeyValueType<KeyValueType<any>>;
   global: KeyValueType<any>;
 }
 
