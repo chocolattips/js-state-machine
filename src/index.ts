@@ -88,19 +88,20 @@ export default function _default(state?: DefaultStateType) {
   }
   function emit(eventName: string, data?: any, context?: IStateContext) {
     if (!_state.currentState) {
-      return;
+      return false;
     }
 
-    if (context) {
-      if (context.state.name != _state.currentState.name) {
-        return;
-      }
+    if (context && _state.currentContext != context) {
+      console.log("- not current context");
+      return false;
     }
 
     _callback.executeEmit(
       { eventName, data, context: self, state: _state.currentState },
       _variable.getVariable(_state.currentState.name)
     );
+
+    return true;
   }
   function on<K extends keyof EventHandlerNameMap>(
     eventName: K,

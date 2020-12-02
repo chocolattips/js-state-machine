@@ -23,7 +23,7 @@ export interface IContextBase {
 
 export interface IStateContext extends IContextBase {
   state: IState;
-  emit: (eventName: string, data?: any) => void;
+  emit: (eventName: string, data?: any) => boolean;
 }
 
 export interface IFSMContext extends IContextBase {
@@ -31,7 +31,7 @@ export interface IFSMContext extends IContextBase {
 }
 
 export interface IRootContext extends IContextBase {
-  emit: (eventName: string, data?: any, context?: IStateContext) => void;
+  emit: (eventName: string, data?: any, context?: IStateContext) => boolean;
 }
 
 export interface IEnterParamBase {

@@ -212,7 +212,8 @@ describe("StateMachine", () => {
           onEnter(param) {
             setTimeout(() => {
               flags.emitApple = true;
-              param.context.emit("apple");
+              const b = param.context.emit("apple");
+              expect(b).toBeFalsy();
             }, 100);
             param.context.to("banana");
           },
@@ -222,7 +223,8 @@ describe("StateMachine", () => {
           onEnter(param) {
             setTimeout(() => {
               flags.emitBanana = true;
-              param.context.emit("banana");
+              const b = param.context.emit("banana");
+              expect(b).toBeTruthy();
             }, 200);
           },
         },
