@@ -180,16 +180,18 @@ describe("StateMachine", () => {
   });
 
   describe("emit", () => {
-    function setup() {
+    function setup(state?: IState) {
       const eventName = "helloworld";
       const eventData = { hello: "WORLD" };
 
-      const fsm = useStateMachine().putState({
-        name: "hello",
-        onEnter(param) {
-          param.context.emit(eventName, eventData);
-        },
-      });
+      const fsm = useStateMachine().putState(
+        state || {
+          name: "hello",
+          onEnter(param) {
+            param.context.emit(eventName, eventData);
+          },
+        }
+      );
 
       return {
         fsm,
@@ -197,6 +199,54 @@ describe("StateMachine", () => {
         eventData,
       };
     }
+
+    it("async emit", (done) => {
+      const flags = {
+        emitApple: false,
+        emitBanana: false,
+      } as { [key: string]: boolean };
+
+      const fsm = useStateMachine().putSequences([
+        {
+          name: "apple",
+          onEnter(param) {
+            setTimeout(() => {
+              flags.emitApple = true;
+              param.context.emit("apple");
+            }, 100);
+            param.context.to("banana");
+          },
+        },
+        {
+          name: "banana",
+          onEnter(param) {
+            setTimeout(() => {
+              flags.emitBanana = true;
+              param.context.emit("banana");
+            }, 200);
+          },
+        },
+      ]);
+
+      fsm
+        .onEmitMethods({
+          apple(param) {
+            done("error : apple called");
+          },
+          banana(param) {
+            try {
+              for (const key in flags) {
+                expect(flags[key]).toBeTruthy();
+              }
+            } catch {
+              done("flag error");
+            }
+
+            done();
+          },
+        })
+        .entry("apple");
+    });
 
     it("onEmitMethods", (done) => {
       const o = setup();

@@ -10,6 +10,7 @@ import {
 
 interface IModel {
   readonly currentState: IState | null;
+  readonly currentContext: IStateContext | null;
   readonly states: KeyValueType<IState>;
   readonly transitions: KeyValueType<ITransition[]>;
 }
@@ -25,7 +26,6 @@ type DefaultStateType = ReturnType<typeof useDefaultState>;
 
 export default function (
   model: IModel,
-  context: IStateContext,
   setState: FSMSetStateType,
   callback: FSMCallbackType,
   variable: FSMVariableType,
@@ -53,7 +53,7 @@ export default function (
   function changeState(transition: ITransition, argument: any) {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        setState.exit(transition, context);
+        setState.exit(transition);
 
         const next = model.states[transition.to] || null;
         if (next) {
@@ -67,7 +67,7 @@ export default function (
             }
           }
 
-          setState.enter(next, argument, transition, context);
+          setState.enter(next, argument, transition);
         } else {
           end();
         }

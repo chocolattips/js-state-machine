@@ -3,6 +3,7 @@ import useFSMCallback from "../src/FSMCallback";
 import useFSMVariable from "../src/FSMVariable";
 import {
   IFSMContext,
+  IRootContext,
   ISharedVariableStore,
   IState,
   IStateContext,
@@ -13,6 +14,7 @@ describe("FSMSetState", () => {
   function setup() {
     const model = {
       currentState: null as IState | null,
+      currentContext: null as IStateContext | null,
       sharedVariable: {
         locals: {},
         internals: {},
@@ -22,9 +24,10 @@ describe("FSMSetState", () => {
 
     const fsmContext = {} as IFSMContext;
     const context = {} as IStateContext;
+    const rootContext = {} as IRootContext;
     const callback = useFSMCallback(fsmContext);
     const variable = useFSMVariable(model, context, callback);
-    const setState = useFSMSetState(model, callback, variable);
+    const setState = useFSMSetState(model, rootContext, callback, variable);
 
     return {
       model,
@@ -48,7 +51,7 @@ describe("FSMSetState", () => {
           done();
         },
       };
-      o.setState.enter(state, arg, <ITransition>{}, o.context);
+      o.setState.enter(state, arg, <ITransition>{});
     });
   });
 
@@ -62,7 +65,8 @@ describe("FSMSetState", () => {
         },
       };
       o.model.currentState = state;
-      o.setState.exit(<ITransition>{}, o.context);
+      o.model.currentContext = {} as IStateContext;
+      o.setState.exit(<ITransition>{});
     });
   });
 });
