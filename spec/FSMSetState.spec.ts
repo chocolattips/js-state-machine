@@ -26,7 +26,7 @@ describe("FSMSetState", () => {
     const context = {} as IStateContext;
     const rootContext = {} as IRootContext;
     const callback = useFSMCallback(fsmContext);
-    const variable = useFSMVariable(model, context, callback);
+    const variable = useFSMVariable(model, callback);
     const setState = useFSMSetState(model, rootContext, callback, variable);
 
     return {

@@ -57,7 +57,7 @@ export default function _default(state?: DefaultStateType) {
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
   const _callback = useStateMachineCallback(self);
-  const _variable = useStateMachineVariable(_state, self, _callback);
+  const _variable = useStateMachineVariable(_state, _callback);
   const _setState = useStateMachineSetState(_state, self, _callback, _variable);
   const _controlState = useStateMachineControlState(
     _state,
@@ -86,17 +86,21 @@ export default function _default(state?: DefaultStateType) {
     _builder.putSequences(x, loop);
     return self;
   }
-  function emit(eventName: string, data?: any, current?: IState) {
-    if (_state.currentState) {
-      if (current && current.name != _state.currentState.name) {
+  function emit(eventName: string, data?: any, context?: IStateContext) {
+    if (!_state.currentState) {
+      return;
+    }
+
+    if (context) {
+      if (context.state.name != _state.currentState.name) {
         return;
       }
-
-      _callback.executeEmit(
-        { eventName, data, context: self, state: _state.currentState },
-        _variable.getVariable(_state.currentState.name)
-      );
     }
+
+    _callback.executeEmit(
+      { eventName, data, context: self, state: _state.currentState },
+      _variable.getVariable(_state.currentState.name)
+    );
   }
   function on<K extends keyof EventHandlerNameMap>(
     eventName: K,
@@ -145,7 +149,9 @@ export default function _default(state?: DefaultStateType) {
     value?: any,
     targetStateName?: string
   ): DefaultType {
-    _variable.updateData(key, value, targetStateName);
+    if (_state.currentContext) {
+      _variable.updateData(_state.currentContext, key, value, targetStateName);
+    }
     return self;
   }
   function setGlobalData(data: any): DefaultType {

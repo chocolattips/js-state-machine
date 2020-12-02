@@ -1,11 +1,12 @@
-import { IState, IRootContext, IStateContext } from "./FSMInterface";
+import { IState, IRootContext } from "./FSMInterface";
 
-export default function (state: IState, context: IRootContext): IStateContext {
+export default function (state: IState, context: IRootContext) {
   const self = {
     to,
     can,
     finish,
     emit,
+    state,
   };
 
   function to(stateName: string, param?: any) {
@@ -21,7 +22,7 @@ export default function (state: IState, context: IRootContext): IStateContext {
   }
 
   function emit(eventName: string, data?: any) {
-    context.emit(eventName, data, state);
+    context.emit(eventName, data, self);
   }
 
   return self;
