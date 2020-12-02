@@ -10,7 +10,9 @@ export default function (state: IState, context: IRootContext) {
   };
 
   function to(stateName: string, param?: any) {
-    context.to(stateName, param, state);
+    if (context.isCurrentContext(self)) {
+      context.to(stateName, param, state);
+    }
   }
 
   function can(stateName: string) {
@@ -18,11 +20,16 @@ export default function (state: IState, context: IRootContext) {
   }
 
   function finish() {
-    context.finish();
+    if (context.isCurrentContext(self)) {
+      context.finish();
+    }
   }
 
   function emit(eventName: string, data?: any) {
-    return context.emit(eventName, data, self);
+    if (context.isCurrentContext(self)) {
+      return context.emit(eventName, data, self);
+    }
+    return false;
   }
 
   return self;

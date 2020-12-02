@@ -31,6 +31,7 @@ export interface IFSMContext extends IContextBase {
 }
 
 export interface IRootContext extends IContextBase {
+  isCurrentContext(context: IStateContext): boolean;
   emit: (eventName: string, data?: any, context?: IStateContext) => boolean;
 }
 

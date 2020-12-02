@@ -50,6 +50,7 @@ export default function _default(state?: DefaultStateType) {
     can,
     finish,
 
+    isCurrentContext,
     updateData,
     setGlobalData,
     clearLocalData,
@@ -86,13 +87,8 @@ export default function _default(state?: DefaultStateType) {
     _builder.putSequences(x, loop);
     return self;
   }
-  function emit(eventName: string, data?: any, context?: IStateContext) {
+  function emit(eventName: string, data?: any) {
     if (!_state.currentState) {
-      return false;
-    }
-
-    if (context && _state.currentContext != context) {
-      console.log("- not current context");
       return false;
     }
 
@@ -129,6 +125,9 @@ export default function _default(state?: DefaultStateType) {
   }
   function isHead(stateName: string) {
     return _controlState.isHead(stateName);
+  }
+  function isCurrentContext(context: IStateContext) {
+    return context && _state.currentContext == context;
   }
   async function to(
     stateName: string,
