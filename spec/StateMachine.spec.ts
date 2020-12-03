@@ -2,7 +2,7 @@ import useStateMachine, { useDefaultState } from "../src";
 import { IState } from "../src/FSMInterface";
 
 describe("StateMachine", () => {
-  function setupSequences(ls?: any[]) {
+  function setupSequences(ls?: IState[]) {
     const fsmState = useDefaultState();
     const fsm = useStateMachine(fsmState);
     ls = ls || [{ name: "hello" }, { name: "world" }];
@@ -112,6 +112,36 @@ describe("StateMachine", () => {
       expect(o.fsmState.currentState).toEqual(o.states[0]);
       await o.fsm.to(o.states[1].name);
       expect(o.fsmState.currentState).toEqual(o.states[1]);
+    });
+
+    it("not work context.to in differen context", async (done) => {
+      let firsttime = true;
+      const o = setupSequences([
+        {
+          name: "apple",
+          onEnter(param) {
+            if (!firsttime) {
+              return;
+            }
+            firsttime = false;
+
+            setTimeout(async () => {
+              const b = await param.context.to("banana");
+              try {
+                expect(b).toBeFalsy();
+                done();
+              } catch (e) {
+                done(e);
+              }
+            }, 100);
+          },
+        },
+        {
+          name: "banana",
+        },
+      ]);
+      await o.fsm.entry(o.states[0].name);
+      await o.fsm.entry(o.states[0].name);
     });
 
     it("argument", async (done) => {

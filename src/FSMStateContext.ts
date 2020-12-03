@@ -9,10 +9,12 @@ export default function (state: IState, context: IRootContext) {
     state,
   };
 
-  function to(stateName: string, param?: any) {
+  async function to(stateName: string, param?: any) {
     if (context.isCurrentContext(self)) {
-      context.to(stateName, param, state);
+      return await context.to(stateName, param, state);
     }
+
+    return false;
   }
 
   function can(stateName: string) {

@@ -133,9 +133,8 @@ export default function _default(state?: DefaultStateType) {
     stateName: string,
     argument?: any,
     current?: IState
-  ): Promise<DefaultType> {
-    await _controlState.to(stateName, argument, current);
-    return self;
+  ): Promise<boolean> {
+    return await _controlState.to(stateName, argument, current);
   }
   function can(stateName: string, current?: IState) {
     return _controlState.findTransition(stateName, current) != null;

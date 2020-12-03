@@ -81,7 +81,10 @@ export default function (
     const t = findTransition(stateName, current);
     if (null != t) {
       await changeState(t, argument);
+      return true;
     }
+
+    return false;
   }
 
   function findTransition(stateName: string, current?: IState) {

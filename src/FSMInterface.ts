@@ -16,7 +16,7 @@ export interface ITransition {
 }
 
 export interface IContextBase {
-  to: (stateName: string, param?: any, current?: IState) => void;
+  to: (stateName: string, param?: any, current?: IState) => Promise<boolean>;
   can: (stateName: string, current?: IState) => boolean;
   finish: () => void;
 }
