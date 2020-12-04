@@ -86,6 +86,13 @@ export interface IFSMEventParam extends IEventParam {
 
 export interface ISharedVariable {
   local: KeyValueType<any>;
+  state: KeyValueType<any>;
+  global: KeyValueType<any>;
+}
+
+export interface ISharedVariableStore {
+  locals: KeyValueType<KeyValueType<any>>;
+  internals: KeyValueType<KeyValueType<any>>;
   global: KeyValueType<any>;
 }
 

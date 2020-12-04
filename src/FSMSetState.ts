@@ -1,15 +1,9 @@
 import { FSMCallbackType } from "./FSMCallback";
 import { FSMVariableType } from "./FSMVariable";
-import {
-  IState,
-  ITransition,
-  ISharedVariable,
-  IStateContext,
-} from "./FSMInterface";
+import { IState, ITransition, IStateContext } from "./FSMInterface";
 
 interface IModel {
   currentState: IState | null;
-  readonly sharedVariable: ISharedVariable;
 }
 
 export type FSMSetStateType = ReturnType<typeof _default>;
@@ -30,7 +24,7 @@ export default function _default(
 
     callback.executeEnter(
       { state: next, transition, context, argument },
-      model.sharedVariable
+      variable.getVariable(next.name)
     );
   }
 
@@ -39,7 +33,7 @@ export default function _default(
     if (pre) {
       callback.executeExit(
         { state: pre, transition, context },
-        model.sharedVariable
+        variable.getVariable(pre.name)
       );
     }
     model.currentState = null;

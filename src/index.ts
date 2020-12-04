@@ -7,7 +7,7 @@ import {
   KeyValueType,
   IState,
   ITransition,
-  ISharedVariable,
+  ISharedVariableStore,
   EventHandlerNameMap,
   EmitHandlerType,
 } from "./FSMInterface";
@@ -19,7 +19,11 @@ export function useDefaultState() {
     currentState: null as IState | null,
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
-    sharedVariable: { local: {}, global: {} } as ISharedVariable,
+    sharedVariable: {
+      locals: {},
+      internals: {},
+      global: {},
+    } as ISharedVariableStore,
   };
 }
 type DefaultStateType = ReturnType<typeof useDefaultState>;
@@ -57,7 +61,8 @@ export default function _default(state?: DefaultStateType) {
     _state,
     self,
     _setState,
-    _callback
+    _callback,
+    _variable
   );
 
   function putStates(x: IState[]): DefaultType {
@@ -84,7 +89,7 @@ export default function _default(state?: DefaultStateType) {
     if (_state.currentState) {
       _callback.executeEmit(
         { eventName, data, context: self, state: _state.currentState },
-        _state.sharedVariable
+        _variable.getVariable(_state.currentState.name)
       );
     }
   }

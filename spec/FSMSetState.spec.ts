@@ -3,6 +3,7 @@ import useFSMCallback from "../src/FSMCallback";
 import useFSMVariable from "../src/FSMVariable";
 import {
   IFSMContext,
+  ISharedVariableStore,
   IState,
   IStateContext,
   ITransition,
@@ -13,9 +14,10 @@ describe("FSMSetState", () => {
     const model = {
       currentState: null as IState | null,
       sharedVariable: {
-        local: {},
+        locals: {},
+        internals: {},
         global: {},
-      },
+      } as ISharedVariableStore,
     };
 
     const fsmContext = {} as IFSMContext;
