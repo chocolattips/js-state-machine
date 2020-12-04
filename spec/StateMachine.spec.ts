@@ -2,7 +2,7 @@ import useStateMachine, { useDefaultState } from "../src";
 import { IState } from "../src/FSMInterface";
 
 describe("StateMachine", () => {
-  function setupSequences(ls?: any[]) {
+  function setupSequences(ls?: IState[]) {
     const fsmState = useDefaultState();
     const fsm = useStateMachine(fsmState);
     ls = ls || [{ name: "hello" }, { name: "world" }];
@@ -114,6 +114,36 @@ describe("StateMachine", () => {
       expect(o.fsmState.currentState).toEqual(o.states[1]);
     });
 
+    it("not work context.to in differen context", async (done) => {
+      let firsttime = true;
+      const o = setupSequences([
+        {
+          name: "apple",
+          onEnter(param) {
+            if (!firsttime) {
+              return;
+            }
+            firsttime = false;
+
+            setTimeout(async () => {
+              const b = await param.context.to("banana");
+              try {
+                expect(b).toBeFalsy();
+                done();
+              } catch (e) {
+                done(e);
+              }
+            }, 100);
+          },
+        },
+        {
+          name: "banana",
+        },
+      ]);
+      await o.fsm.entry(o.states[0].name);
+      await o.fsm.entry(o.states[0].name);
+    });
+
     it("argument", async (done) => {
       const o = setupSequences();
       await o.fsm.entry(o.states[0].name);
@@ -180,16 +210,18 @@ describe("StateMachine", () => {
   });
 
   describe("emit", () => {
-    function setup() {
+    function setup(state?: IState) {
       const eventName = "helloworld";
       const eventData = { hello: "WORLD" };
 
-      const fsm = useStateMachine().putState({
-        name: "hello",
-        onEnter(param) {
-          param.context.emit(eventName, eventData);
-        },
-      });
+      const fsm = useStateMachine().putState(
+        state || {
+          name: "hello",
+          onEnter(param) {
+            param.context.emit(eventName, eventData);
+          },
+        }
+      );
 
       return {
         fsm,
@@ -197,6 +229,56 @@ describe("StateMachine", () => {
         eventData,
       };
     }
+
+    it("async emit", (done) => {
+      const flags = {
+        emitApple: false,
+        emitBanana: false,
+      } as { [key: string]: boolean };
+
+      const fsm = useStateMachine().putSequences([
+        {
+          name: "apple",
+          onEnter(param) {
+            setTimeout(() => {
+              flags.emitApple = true;
+              const b = param.context.emit("apple");
+              expect(b).toBeFalsy();
+            }, 100);
+            param.context.to("banana");
+          },
+        },
+        {
+          name: "banana",
+          onEnter(param) {
+            setTimeout(() => {
+              flags.emitBanana = true;
+              const b = param.context.emit("banana");
+              expect(b).toBeTruthy();
+            }, 200);
+          },
+        },
+      ]);
+
+      fsm
+        .onEmitMethods({
+          apple(param) {
+            done("error : apple called");
+          },
+          banana(param) {
+            try {
+              for (const key in flags) {
+                expect(flags[key]).toBeTruthy();
+              }
+            } catch {
+              done("flag error");
+            }
+
+            done();
+          },
+        })
+        .entry("apple");
+    });
 
     it("onEmitMethods", (done) => {
       const o = setup();

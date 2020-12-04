@@ -13,12 +13,13 @@ interface IModel {
 
 export type FSMVariableType = ReturnType<typeof _default>;
 
-export default function _default(
-  model: IModel,
-  context: IStateContext,
-  callback: FSMCallbackType
-) {
-  function updateData(key: string, value?: any, targetStateName?: string) {
+export default function _default(model: IModel, callback: FSMCallbackType) {
+  function updateData(
+    context: IStateContext,
+    key: string,
+    value?: any,
+    targetStateName?: string
+  ) {
     const c = model.currentState;
     if (c && (!targetStateName || targetStateName == c.name)) {
       callback.executeUpdate(

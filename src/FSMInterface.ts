@@ -15,18 +15,24 @@ export interface ITransition {
   to: string;
 }
 
-export interface IStateContext {
-  to: (stateName: string, param?: any, current?: IState) => void;
+export interface IContextBase {
+  to: (stateName: string, param?: any, current?: IState) => Promise<boolean>;
   can: (stateName: string, current?: IState) => boolean;
   finish: () => void;
-  emit: (eventName: string, data?: any) => void;
 }
 
-export interface IFSMContext {
-  to: (stateName: string, param?: any, current?: IState) => void;
-  can: (stateName: string, current?: IState) => boolean;
-  finish: () => void;
+export interface IStateContext extends IContextBase {
+  state: IState;
+  emit: (eventName: string, data?: any) => boolean;
+}
+
+export interface IFSMContext extends IContextBase {
   updateData: (key: string, value?: any, targetStateName?: string) => void;
+}
+
+export interface IRootContext extends IContextBase {
+  isCurrentContext(context: IStateContext): boolean;
+  emit: (eventName: string, data?: any, context?: IStateContext) => boolean;
 }
 
 export interface IEnterParamBase {
