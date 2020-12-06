@@ -1,24 +1,30 @@
 import { FSMCallbackType } from "./FSMCallback";
-import { ISharedVariable, IState, IStateContext } from "./FSMInterface";
+import {
+  ISharedVariable,
+  ISharedVariableStore,
+  IState,
+  IStateContext,
+} from "./FSMInterface";
 
 interface IModel {
-  sharedVariable: ISharedVariable;
+  sharedVariable: ISharedVariableStore;
   readonly currentState: IState | null;
 }
 
 export type FSMVariableType = ReturnType<typeof _default>;
 
-export default function _default(
-  model: IModel,
-  context: IStateContext,
-  callback: FSMCallbackType
-) {
-  function updateData(key: string, value?: any, targetStateName?: string) {
+export default function _default(model: IModel, callback: FSMCallbackType) {
+  function updateData(
+    context: IStateContext,
+    key: string,
+    value?: any,
+    targetStateName?: string
+  ) {
     const c = model.currentState;
     if (c && (!targetStateName || targetStateName == c.name)) {
       callback.executeUpdate(
         { state: c, key, value, context },
-        model.sharedVariable
+        getVariable(c.name)
       );
     } else {
       console.log(`x not update data : ${key}`);
@@ -30,12 +36,36 @@ export default function _default(
   }
 
   function clearLocalData() {
-    model.sharedVariable.local = {};
+    const c = model.currentState;
+    if (c) {
+      model.sharedVariable.locals[c.name] = {};
+    }
+  }
+
+  function getVariable(stateName: string) {
+    const s = model.sharedVariable;
+    if (!stateName) {
+      return <ISharedVariable>{ local: {}, state: {}, global: s.global };
+    }
+
+    if (!s.locals[stateName]) {
+      s.locals[stateName] = {};
+    }
+    if (!s.internals[stateName]) {
+      s.internals[stateName] = {};
+    }
+
+    return <ISharedVariable>{
+      local: s.locals[stateName],
+      state: s.internals[stateName],
+      global: s.global,
+    };
   }
 
   return {
     updateData,
     setGlobalData,
     clearLocalData,
+    getVariable,
   };
 }

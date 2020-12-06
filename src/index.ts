@@ -7,9 +7,10 @@ import {
   KeyValueType,
   IState,
   ITransition,
-  ISharedVariable,
+  ISharedVariableStore,
   EventHandlerNameMap,
   EmitHandlerType,
+  IStateContext,
 } from "./FSMInterface";
 
 type DefaultType = ReturnType<typeof _default>;
@@ -17,9 +18,14 @@ type DefaultType = ReturnType<typeof _default>;
 export function useDefaultState() {
   return {
     currentState: null as IState | null,
+    currentContext: null as IStateContext | null,
     states: {} as KeyValueType<IState>,
     transitions: {} as KeyValueType<ITransition[]>,
-    sharedVariable: { local: {}, global: {} } as ISharedVariable,
+    sharedVariable: {
+      locals: {},
+      internals: {},
+      global: {},
+    } as ISharedVariableStore,
   };
 }
 type DefaultStateType = ReturnType<typeof useDefaultState>;
@@ -36,10 +42,15 @@ export default function _default(state?: DefaultStateType) {
     emit,
     on,
     onEmitMethods,
+
     entry,
+    setHead,
+    isHead,
     to,
+    can,
     finish,
 
+    isCurrentContext,
     updateData,
     setGlobalData,
     clearLocalData,
@@ -47,13 +58,13 @@ export default function _default(state?: DefaultStateType) {
 
   const _builder = useStateMachineBuilder(_state.states, _state.transitions);
   const _callback = useStateMachineCallback(self);
-  const _variable = useStateMachineVariable(_state, self, _callback);
-  const _setState = useStateMachineSetState(_state, _callback, _variable);
+  const _variable = useStateMachineVariable(_state, _callback);
+  const _setState = useStateMachineSetState(_state, self, _callback, _variable);
   const _controlState = useStateMachineControlState(
     _state,
-    self,
     _setState,
-    _callback
+    _callback,
+    _variable
   );
 
   function putStates(x: IState[]): DefaultType {
@@ -77,12 +88,16 @@ export default function _default(state?: DefaultStateType) {
     return self;
   }
   function emit(eventName: string, data?: any) {
-    if (_state.currentState) {
-      _callback.executeEmit(
-        { eventName, data, context: self, state: _state.currentState },
-        _state.sharedVariable
-      );
+    if (!_state.currentState) {
+      return false;
     }
+
+    _callback.executeEmit(
+      { eventName, data, context: self, state: _state.currentState },
+      _variable.getVariable(_state.currentState.name)
+    );
+
+    return true;
   }
   function on<K extends keyof EventHandlerNameMap>(
     eventName: K,
@@ -104,13 +119,25 @@ export default function _default(state?: DefaultStateType) {
     await _controlState.entry(stateName, argument);
     return self;
   }
+  function setHead(stateName: string): DefaultType {
+    _controlState.setHead(stateName);
+    return self;
+  }
+  function isHead(stateName: string) {
+    return _controlState.isHead(stateName);
+  }
+  function isCurrentContext(context: IStateContext) {
+    return context && _state.currentContext == context;
+  }
   async function to(
     stateName: string,
     argument?: any,
     current?: IState
-  ): Promise<DefaultType> {
-    await _controlState.to(stateName, argument, current);
-    return self;
+  ): Promise<boolean> {
+    return await _controlState.to(stateName, argument, current);
+  }
+  function can(stateName: string, current?: IState) {
+    return _controlState.findTransition(stateName, current) != null;
   }
   async function finish(): Promise<DefaultType> {
     await _controlState.finish();
@@ -121,7 +148,9 @@ export default function _default(state?: DefaultStateType) {
     value?: any,
     targetStateName?: string
   ): DefaultType {
-    _variable.updateData(key, value, targetStateName);
+    if (_state.currentContext) {
+      _variable.updateData(_state.currentContext, key, value, targetStateName);
+    }
     return self;
   }
   function setGlobalData(data: any): DefaultType {
